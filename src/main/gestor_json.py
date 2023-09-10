@@ -1,11 +1,12 @@
 import json
 import os
+PATH = os.path.dirname(__file__)[:-4] + "storage/users.json"
 
 class JsonOp():
     """Json operation master"""
 
     def __init__(self):
-        self.path = "src/storage/users.json"
+        self.path = PATH
         self.key = "user_name"
         self.data_list = None
 
@@ -27,6 +28,13 @@ class JsonOp():
             if item[self.key] == value:
                 return item
         return None
+
+    def search_password(self, name, value):
+        for item in self.data_list:
+            if item[self.key] == name:
+                if item["pw_token"] == value:
+                    return True
+        return False
 
     def save(self):
         """dumps data list in file"""
