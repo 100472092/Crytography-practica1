@@ -6,7 +6,9 @@ if __name__ == '__main__':
         if userchoice == "1":
             user.register_user()
         elif userchoice == "2":
-            user.login_user()
+            valid_user = user.login_user()
+            if valid_user:
+                valid_user.functionality()
         else:
             print("ERROR, acción no válida")
 

@@ -9,7 +9,7 @@ def register_user():
     while users_data.search(name):
         name = input("Nombre de usuario ya existente. Introduce otro: ")
     password = input("Introduzca la contraseña: ")
-    new_user = User(name, password) # TODO: cifrar password
+    new_user = Credentials(name, password) # TODO: cifrar password
     users_data.data_list.append(new_user.__dict__)
     users_data.save()
 
@@ -29,13 +29,65 @@ def login_user():
             fallo = True
     if fallo is True:
         print("Demasiados intentos fallidos.")
+        return False
     else:
+        user = User(name)
         print("Bienvenido de vuelta,", name)
+        return user
 
-class User():
+class Credentials():
     def __init__(self, user_name: str,  pw_token: str): # TODO: añadir salt
         self.user_name = user_name
         self.pw_token = pw_token
 
-
+class User():
+    def __init__(self, user_name):
+        self.user_name = user_name
+        self.subjectlist = []
+        self.examlist = []
+        self.projectlist = []
+    def functionality(self):
+        while True:
+            userchoice = input("1: AÑADIR ASIGNATURA. \n 2: AÑADIR EXAMEN. \n 3: AÑADIR FECHA DE ENTREGA. \n")
+            if userchoice == "1":
+                newsubject = input("Escriba asignatura a añadir: ")
+                self.addSubject(newsubject)
+            elif userchoice == "2":
+                self.addExam()
+            elif userchoice == "3":
+                self.addProject()
+            else:
+                print("ERROR, acción no válida")
+    def addSubject(self, new_subject):
+        self.subjectlist.append(new_subject)
+    def addExam(self):
+        print(self.subjectlist)
+        subject = input("Elije asignatura:")
+        while subject not in self.subjectlist and subject != "0":
+            subject = input("No existe la asignatura, elige una asignatura válida. Exit:0 \n")
+        if subject != 0:
+            fecha = input("Añada un día y hora para el examen")
+            registered = False
+            for item in self.examlist:
+                if item[subject]:
+                    item[subject].append(fecha)
+                    registered = True
+            if not registered:
+                self.examlist.append({subject: [fecha]})
+            print(self.examlist)
+    def addProject(self):
+        print(self.subjectlist)
+        subject = input("Elije asignatura:")
+        while subject not in self.subjectlist and subject != "0":
+            subject = input("No existe la asignatura, elige una asignatura válida. Exit:0 \n")
+        if subject != 0:
+            fecha = input("Añada un día y hora para el examen")
+            registered = False
+            for item in self.projectlist:
+                if item[subject]:
+                    item[subject].append(fecha)
+                    registered = True
+            if not registered:
+                self.projectlist.append({subject: [fecha]})
+            print(self.projectlist)
 
