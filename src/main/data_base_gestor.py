@@ -201,6 +201,7 @@ if __name__ == "__main__":
     print(PATH)
     db = DataBase()
     db.restore()
+    #db.initialize()
     control = input("wanna insert test data?[Y/N]: ")
     if control == "Y":
         db.insert_test_case()

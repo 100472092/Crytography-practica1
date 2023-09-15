@@ -1,7 +1,13 @@
 import user
+import os
 from data_base_gestor import DataBase
 
 def main():
+    # Sino existe, inicializa la base de datos
+    if not os.path.exists(os.path.dirname(__file__)[:-4] + "storage"):
+        os.makedirs(os.path.dirname(__file__)[:-4] + "storage", mode=0o777, exist_ok=False)
+        DataBase().initialize()
+
     valid_user = None
     while valid_user is None:
         # db = DataBase().print_all() # Debug
