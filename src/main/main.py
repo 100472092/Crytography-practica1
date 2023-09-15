@@ -16,9 +16,9 @@ def main():
             return 0
         else:
             print("ERROR, acción no válida")
-
-    while valid_user.functionality():
-        continue
+    exit_code = 1
+    while not exit_code == 0:
+        exit_code = valid_user.functionality()
 
 
 # Press the green button in the gutter to run the script.

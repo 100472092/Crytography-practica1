@@ -46,12 +46,15 @@ class User():
             match userchoice:
                 case "1":
                     self.addSubject()
+                    return 1
                 case "2":
                     self.addExam()
+                    return 1
                 case "3":
                     self.addProject()
+                    return 1
                 case "4":
-                    return
+                    return 0
                 case _:
                     print("Error: Acción no válidad")
 
@@ -66,20 +69,34 @@ class User():
 
 
     def addExam(self):
-        print(self.subjectlist)
+        db = DataBase()
+        subjects_list = db.subjects_from_user(self.user_name)
+        print("Asignaturas disponibles:",subjects_list)
         subject = input("Elije asignatura:")
-        while subject not in self.subjectlist and subject != "0":
+        while subject not in subjects_list and subject != "0":
             subject = input("No existe la asignatura, elige una asignatura válida. Exit:0 \n")
-        if subject != "0":
-            fecha = input("Añada un día y hora para el examen")
-            registered = False
-            for item in self.examlist:
-                if item[subject]:
-                    item[subject].append(fecha)
-                    registered = True
-            if not registered:
-                self.examlist.append({subject: [fecha]})
-            print(self.examlist)
+        if subject == "0":
+            return
+
+        exams_lists = db.exams_from_subject(self.user_name, subject)
+        print(exams_lists)
+        fecha = input("Añada el día del el examen [dd-mm-yyyy]") # TODO: REGEX TO VALIDATE DATE
+
+        if fecha in exams_lists:
+            print("Ese examen ya está registrado!!")
+        else:
+            add_mark = input("Quieres añadir una nota al examen?[Y/N]")
+            if add_mark == "Y":
+                try:
+                    mark = int(input("Nota del examen: "))
+                except:
+                    mark = -1
+                    print("Nota no válida, no se asignará nota")
+            db.register_new_event(self.user_name, subject, fecha, "EXAM", mark)
+        db.print_exams()
+
+
+
 
     def addProject(self):
         print(self.subjectlist)

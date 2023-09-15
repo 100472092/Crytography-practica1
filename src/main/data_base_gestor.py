@@ -130,6 +130,13 @@ class DataBase:
             self.base.execute("commit")
             self.close()
 
+        def register_new_event(self, user: str, subject: str, fecha: str, tipo: str, nota: int):
+            self.open()
+            sql = "INSERT INTO USER_EVENT (USER_NAME, SUBJECT, FECHA, TIPO, NOTA) VALUES(?, ?, ?, ?, ?)"
+            self.base.execute(sql, (user, subject, fecha, tipo, nota))
+            self.base.execute("commit")
+            self.close()
+
 
         def insert_test_case(self):
             self.open()
@@ -145,8 +152,32 @@ class DataBase:
                 ("juan", "filosofia")
             ]
             self.base.executemany("INSERT INTO USER_SUBJ (USER_NAME, SUBJECT) VALUES(?, ?)", data)
+            data = [
+                ("pepe", "matematicas", "12-12-2012", "EXAM", 9),
+                ("pepe", "lengua", "01-01-2013", "EXAM", 9),
+                ("pepe", "lengua", "12-12-2012", "EXAM", 9),
+            ]
+            self.base.executemany("INSERT INTO USER_EVENT (USER_NAME, SUBJECT, FECHA, TIPO, NOTA) VALUES(?, ?, ?, ?, ?)", data)
             self.base.execute("commit")
             self.close()
+
+        def subjects_from_user(self, user:str):
+            self.open()
+            sql = "SELECT SUBJECT FROM USER_SUBJ WHERE USER_NAME=?"
+            data = self.base.execute(sql, (user, )).fetchall()
+            out = []
+            for i in range(len(data)):
+                out.append(data[i][0])
+            return out
+
+        def exams_from_subject(self, user:str, subject: str):
+            self.open()
+            sql = "SELECT FECHA FROM USER_EVENT WHERE USER_NAME=? AND SUBJECT=? AND TIPO='EXAM'"
+            data = self.base.execute(sql, (user, subject)).fetchall()
+            out = []
+            for item in data:
+                out.append(item[0])
+            return out
 
         def print_creds(self):
             self.open()
@@ -154,12 +185,21 @@ class DataBase:
             for r in data:
                 print(r)
             self.close()
+
         def print_subj(self):
             self.open()
             data = self.base.execute("select * from USER_SUBJ")
             for r in data:
                 print(r)
             self.close()
+
+        def print_exams(self):
+            self.open()
+            data = self.base.execute("select * from USER_EVENT")
+            for r in data:
+                print(r)
+            self.close()
+
         def print_all(self):
             self.print_creds()
             self.print_subj()
