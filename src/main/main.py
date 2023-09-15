@@ -4,7 +4,7 @@ from data_base_gestor import DataBase
 def main():
     valid_user = None
     while valid_user is None:
-        db = DataBase().print_all() # Debug
+        # db = DataBase().print_all() # Debug
         userchoice = input(
             "Presione un número para empezar:\n 1: REGISTRAR NUEVO USUARIO. \n 2: INICIAR SESION. \n 3. SALIR\n")
         if userchoice == "1":

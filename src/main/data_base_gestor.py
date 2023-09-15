@@ -1,5 +1,6 @@
 import os
 import sqlite3 as sl
+import sql_scripts
 
 PATH = os.path.dirname(__file__)[:-4] + "storage/database.db"
 
@@ -151,6 +152,16 @@ class DataBase:
                 out.append(item[0])
             return out
 
+        def projects_from_subject(self, user: str, subject: str):
+            """extrae una lista de todos los proyectos de un usuario dada una asignatura"""
+            self.open()
+            sql = "SELECT FECHA FROM USER_EVENT WHERE USER_NAME=? AND SUBJECT=? AND TIPO='PROJECT'"
+            data = self.base.execute(sql, (user, subject)).fetchall()
+            out = []
+            for item in data:
+                out.append(item[0])
+            return out
+
         def subjects_from_user(self, user:str):
             """extrae una lista de todas las asignaturas de un usuario"""
             self.open()
@@ -180,6 +191,9 @@ class DataBase:
                 ("pepe", "matematicas", "12-12-2012", "EXAM", 9),
                 ("pepe", "lengua", "01-01-2013", "EXAM", 9),
                 ("pepe", "lengua", "12-12-2012", "EXAM", 9),
+                ("pepe", "matematicas", "12-12-2012", "PROJECT", 7),
+                ("pepe", "lengua", "11-12-2012", "PROJECT", 6),
+
             ]
             self.base.executemany("INSERT INTO USER_EVENT (USER_NAME, SUBJECT, FECHA, TIPO, NOTA) VALUES(?, ?, ?, ?, ?)", data)
             self.base.commit()
