@@ -35,35 +35,28 @@ def login_user(db: DataBase):
         print("Bienvenido de vuelta,", name)
         return user
 
-class Credentials():
-    def __init__(self, user_name: str,  pw_token: str): # TODO: añadir salt
-        self.user_name = user_name
-        self.pw_token = pw_token
-
 class User():
     def __init__(self, user_name):
         self.user_name = user_name
-        self.subjectlist = []
-        self.examlist = []
-        self.projectlist = []
 
-    def functionality(self):
+    def functionality(self, db):
         while True:
             userchoice = input(" 1: AÑADIR ASIGNATURA. \n 2: AÑADIR EXAMEN. \n 3: AÑADIR FECHA DE ENTREGA. \n 4: EXIT \n")
-            if userchoice == "1":
-                newsubject = input("Escriba asignatura a añadir: ")
-                self.addSubject(newsubject)
-            elif userchoice == "2":
-                self.addExam()
-            elif userchoice == "3":
-                self.addProject()
-            elif userchoice == "4":
-                return
-            else:
-                print("ERROR, acción no válida")
+            match userchoice:
+                case "1":
+                    self.addSubject()
+                case "2":
+                    self.addExam()
+                case "3":
+                    self.addProject()
+                case "4":
+                    return
+                case _:
+                    print("Error: Acción no válidad")
 
-    def addSubject(self, new_subject):
-        self.subjectlist.append(new_subject)
+    def addSubject(self):
+        new_subject = input("Escriba asignatura a añadir: ")
+
 
     def addExam(self):
         print(self.subjectlist)
