@@ -4,6 +4,7 @@ import sqlite3 as sl
 PATH = os.path.dirname(__file__)[:-4] + "storage/database.db"
 
 class DataBase:
+    """Interfaz con la base de datos. Sólo instanciable una vez"""
 
     instance = None
 
@@ -49,7 +50,7 @@ class DataBase:
 
         def initialize(self):
             self.open()
-            print("inicializar base de datos...")
+            print("Inicializando base de datos...")
             # inicializar
             # TODO: mover el scrip de sql a otro archivo e importarlo
             self.base.executescript(
@@ -82,7 +83,7 @@ class DataBase:
             self.close()
 
         def search_user(self, user: str):
-            """looks for a user in creds table and returns its name if exists"""
+            """busca en las credenciales un usuario y, si existe, devuelve el nombre"""
             self.open()
             sql = "SELECT USER_NAME FROM USER_CREDS WHERE USER_NAME=?"
             data = self.base.execute(sql, (user, ))
@@ -94,7 +95,7 @@ class DataBase:
             return None
 
         def search_pw(self, password_tk: str):
-            """looks for a user in creds table and returns its name if exists"""
+            """Busca un password token en las credenciales y, si coincide con uno dado, devuelve true"""
             self.open()
             sql = "SELECT PASSWORD FROM USER_CREDS WHERE PASSWORD=?"
             data = self.base.execute(sql, (password_tk, ))
@@ -106,6 +107,7 @@ class DataBase:
             return False
 
         def search_subject(self, user: str, subject: str):
+            """busca una asignatura para un usuario, si existe, la devuelve"""
             self.open()
             sql = "SELECT SUBJECT FROM USER_SUBJ WHERE USER_NAME=? AND SUBJECT=?"
             data = self.base.execute(sql, (user, subject))
@@ -115,29 +117,51 @@ class DataBase:
                 return subject
             return None
 
-
         def register_new_user(self, user: str, password_token: str):
+            """annade un nuevo usuario a la base de datos"""
             self.open()
             sql = "INSERT INTO USER_CREDS (USER_NAME, PASSWORD) VALUES(?, ?)"
             self.base.execute(sql, (user, password_token))
-            self.base.execute("commit")
+            self.base.commit()
             self.close()
 
         def register_new_subject(self, user: str, new_subject:str):
+            """annade una nueva asignatura para un usuario en la base de datos"""
             self.open()
             sql = "INSERT INTO USER_SUBJ (USER_NAME, SUBJECT) VALUES(?, ?)"
             self.base.execute(sql, (user, new_subject))
-            self.base.execute("commit")
+            self.base.commit()
             self.close()
 
         def register_new_event(self, user: str, subject: str, fecha: str, tipo: str, nota: int):
+            """annade un nuevo evento (exam/project) a la base de datos"""
             self.open()
             sql = "INSERT INTO USER_EVENT (USER_NAME, SUBJECT, FECHA, TIPO, NOTA) VALUES(?, ?, ?, ?, ?)"
             self.base.execute(sql, (user, subject, fecha, tipo, nota))
-            self.base.execute("commit")
+            self.base.commit()
             self.close()
 
+        def exams_from_subject(self, user:str, subject: str):
+            """extrae una lista de todos los examens de un usuario dada una asignatura"""
+            self.open()
+            sql = "SELECT FECHA FROM USER_EVENT WHERE USER_NAME=? AND SUBJECT=? AND TIPO='EXAM'"
+            data = self.base.execute(sql, (user, subject)).fetchall()
+            out = []
+            for item in data:
+                out.append(item[0])
+            return out
 
+        def subjects_from_user(self, user:str):
+            """extrae una lista de todas las asignaturas de un usuario"""
+            self.open()
+            sql = "SELECT SUBJECT FROM USER_SUBJ WHERE USER_NAME=?"
+            data = self.base.execute(sql, (user, )).fetchall()
+            out = []
+            for i in range(len(data)):
+                out.append(data[i][0])
+            return out
+
+        # MÉTODOS DE DEBUG Y TEST
         def insert_test_case(self):
             self.open()
             data = [
@@ -158,32 +182,7 @@ class DataBase:
                 ("pepe", "lengua", "12-12-2012", "EXAM", 9),
             ]
             self.base.executemany("INSERT INTO USER_EVENT (USER_NAME, SUBJECT, FECHA, TIPO, NOTA) VALUES(?, ?, ?, ?, ?)", data)
-            self.base.execute("commit")
-            self.close()
-
-        def subjects_from_user(self, user:str):
-            self.open()
-            sql = "SELECT SUBJECT FROM USER_SUBJ WHERE USER_NAME=?"
-            data = self.base.execute(sql, (user, )).fetchall()
-            out = []
-            for i in range(len(data)):
-                out.append(data[i][0])
-            return out
-
-        def exams_from_subject(self, user:str, subject: str):
-            self.open()
-            sql = "SELECT FECHA FROM USER_EVENT WHERE USER_NAME=? AND SUBJECT=? AND TIPO='EXAM'"
-            data = self.base.execute(sql, (user, subject)).fetchall()
-            out = []
-            for item in data:
-                out.append(item[0])
-            return out
-
-        def print_creds(self):
-            self.open()
-            data = self.base.execute("select * from USER_CREDS")
-            for r in data:
-                print(r)
+            self.base.commit()
             self.close()
 
         def print_subj(self):
@@ -193,7 +192,14 @@ class DataBase:
                 print(r)
             self.close()
 
-        def print_exams(self):
+        def print_creds(self):
+            self.open()
+            data = self.base.execute("select * from USER_CREDS")
+            for r in data:
+                print(r)
+            self.close()
+
+        def print_events(self):
             self.open()
             data = self.base.execute("select * from USER_EVENT")
             for r in data:
@@ -203,11 +209,13 @@ class DataBase:
         def print_all(self):
             self.print_creds()
             self.print_subj()
+            self.print_events()
 
 if __name__ == "__main__":
+    print(PATH)
     db = DataBase()
     db.restore()
     control = input("wanna insert test data?[Y/N]: ")
-    if (control == "Y"):
+    if control == "Y":
         db.insert_test_case()
     db.print_all()
