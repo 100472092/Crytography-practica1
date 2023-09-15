@@ -86,6 +86,7 @@ class User():
             print("Ese examen ya está registrado!!")
         else:
             add_mark = input("Quieres añadir una nota al examen?[Y/N]")
+            mark = -1
             if add_mark == "Y":
                 try:
                     mark = int(input("Nota del examen: "))
@@ -112,6 +113,7 @@ class User():
             print("Ese proyecto ya está registrado!!")
         else:
             add_mark = input("Quieres añadir nota al proyecto?[Y/N]")
+            mark = -1
             if add_mark == "Y":
                 try:
                     mark = int(input("Nota del proyecto: "))
