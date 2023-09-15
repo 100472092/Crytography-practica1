@@ -17,10 +17,11 @@ class DataBase:
 
     def __setattr__(self, key, value):
         return setattr(self.instance, key, value)
+
     class __DataBase:
         def __init__(self):
-            self.path = PATH
-            self.base = None
+            self.path: str = PATH
+            self.base: DataBase = None
 
         def open(self):
             self.base = sl.connect(PATH)
@@ -33,6 +34,7 @@ class DataBase:
             """deletes all data"""
             self.drop_base()
             self.initialize()
+
         def drop_base(self):
             self.open()
             # restauración de la base de datos
@@ -100,8 +102,19 @@ class DataBase:
             self.close()
             if len(data) >= 1:
                 # print("found")
-                return True
+                return True # no devolvemos el pw_token por seguridad
             return False
+
+        def search_subject(self, user: str, subject: str):
+            self.open()
+            sql = "SELECT SUBJECT FROM USER_SUBJ WHERE USER_NAME=? AND SUBJECT=?"
+            data = self.base.execute(sql, (user, subject))
+            data = data.fetchall()
+            if len(data) >= 1:
+                print("found")
+                return subject
+            return None
+
 
         def register_new_user(self, user: str, password_token: str):
             self.open()
@@ -109,8 +122,13 @@ class DataBase:
             self.base.execute(sql, (user, password_token))
             self.base.execute("commit")
             self.close()
-            self.print_creds()
 
+        def register_new_subject(self, user: str, new_subject:str):
+            self.open()
+            sql = "INSERT INTO USER_SUBJ (USER_NAME, SUBJECT) VALUES(?, ?)"
+            self.base.execute(sql, (user, new_subject))
+            self.base.execute("commit")
+            self.close()
 
 
         def insert_test_case(self):
@@ -121,6 +139,12 @@ class DataBase:
                 ("sabrina", "1234"),
             ]
             self.base.executemany("INSERT INTO USER_CREDS (USER_NAME, PASSWORD) VALUES(?, ?)", data)
+            data = [
+                ("pepe", "matematicas"),
+                ("pepe", "lengua"),
+                ("juan", "filosofia")
+            ]
+            self.base.executemany("INSERT INTO USER_SUBJ (USER_NAME, SUBJECT) VALUES(?, ?)", data)
             self.base.execute("commit")
             self.close()
 
@@ -130,6 +154,15 @@ class DataBase:
             for r in data:
                 print(r)
             self.close()
+        def print_subj(self):
+            self.open()
+            data = self.base.execute("select * from USER_SUBJ")
+            for r in data:
+                print(r)
+            self.close()
+        def print_all(self):
+            self.print_creds()
+            self.print_subj()
 
 if __name__ == "__main__":
     db = DataBase()
@@ -137,4 +170,4 @@ if __name__ == "__main__":
     control = input("wanna insert test data?[Y/N]: ")
     if (control == "Y"):
         db.insert_test_case()
-    db.print_creds()
+    db.print_all()

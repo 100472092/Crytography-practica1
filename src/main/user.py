@@ -1,7 +1,8 @@
 """this class encapsules user funtionality"""
 from data_base_gestor import DataBase
 
-def register_user(db: DataBase):
+def register_user():
+    db = DataBase()
     name = input("(Escribe exit para salir)\nIntroduzca el nombre de usuario: ")
     while name != "exit" and db.search_user(name.lower()):
         name = input("(Escribe exit para salir)\nNombre de usuario ya existente. Introduce otro: ")
@@ -10,7 +11,8 @@ def register_user(db: DataBase):
     password = input("Introduzca la contraseña: ") # TODO: CIFRAR CONTRASEÑA
     db.register_new_user(name.lower(), password)
 
-def login_user(db: DataBase):
+def login_user():
+    db = DataBase()
     tries = 3
     fallo = False
 
@@ -39,8 +41,7 @@ class User():
     def __init__(self, user_name):
         self.user_name = user_name
 
-    def functionality(self, db):
-        while True:
+    def functionality(self):
             userchoice = input(" 1: AÑADIR ASIGNATURA. \n 2: AÑADIR EXAMEN. \n 3: AÑADIR FECHA DE ENTREGA. \n 4: EXIT \n")
             match userchoice:
                 case "1":
@@ -55,7 +56,13 @@ class User():
                     print("Error: Acción no válidad")
 
     def addSubject(self):
-        new_subject = input("Escriba asignatura a añadir: ")
+        db = DataBase()
+        new_subject = input("Escriba asignatura a añadir: ").lower()
+        if db.search_subject(self.user_name, new_subject):
+            print("Asignatura ya existente!")
+            return
+        print("Registrar asignatura")
+        db.register_new_subject(self.user_name, new_subject)
 
 
     def addExam(self):
