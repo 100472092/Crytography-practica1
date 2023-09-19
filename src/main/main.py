@@ -22,6 +22,7 @@ def main():
             return 0
         else:
             print("ERROR, acción no válida")
+
     exit_code = 1
     while not exit_code == 0:
         exit_code = valid_user.functionality()

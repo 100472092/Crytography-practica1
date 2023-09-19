@@ -6,7 +6,7 @@ def register_user():
     name = input("(Escribe exit para salir)\nIntroduzca el nombre de usuario: ")
     while name != "exit" and db.search_user(name.lower()):
         name = input("(Escribe exit para salir)\nNombre de usuario ya existente. Introduce otro: ")
-    if (name == "exit"):
+    if name == "exit":
         return
     password = input("Introduzca la contraseña: ") # TODO: CIFRAR CONTRASEÑA
     db.register_new_user(name.lower(), password)
@@ -42,8 +42,8 @@ class User():
         self.user_name = user_name
 
     def functionality(self):
-            userchoice = input(" 1: AÑADIR ASIGNATURA. \n 2: AÑADIR EXAMEN. \n 3: AÑADIR PROYECTO. \n 4: EXIT \n")
-            match userchoice:
+            user_choice = input(" 1: AÑADIR ASIGNATURA. \n 2: AÑADIR EXAMEN. \n 3: AÑADIR PROYECTO. \n 4: EXIT \n")
+            match user_choice:
                 case "1":
                     self.add_subject()
                     return 1
@@ -61,11 +61,12 @@ class User():
     def add_subject(self):
         db = DataBase()
         new_subject = input("Escriba asignatura a añadir: ").lower()
+        # TODO: Añadir salida
         if db.search_subject(self.user_name, new_subject):
             print("Asignatura ya existente!")
             return
         print("Registrar asignatura")
-        db.register_new_subject(self.user_name, new_subject)
+        db.register_new_subject(self.user_name, new_subject.lower())
 
 
     def add_exam(self):
