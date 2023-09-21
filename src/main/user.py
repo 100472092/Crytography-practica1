@@ -1,41 +1,23 @@
 """this class encapsules user funtionality"""
 from data_base_gestor import DataBase
 
-def register_user():
+def register_user(user_name: str, password: str):
     db = DataBase()
-    name = input("(Escribe exit para salir)\nIntroduzca el nombre de usuario: ")
-    while name != "exit" and db.search_user(name.lower()):
-        name = input("(Escribe exit para salir)\nNombre de usuario ya existente. Introduce otro: ")
-    if name == "exit":
+
+    if user_name == "" or db.search_user(user_name.lower()) or password == "":
+        print("bad name")
         return
-    password = input("Introduzca la contraseña: ") # TODO: CIFRAR CONTRASEÑA
-    db.register_new_user(name.lower(), password)
+    # TODO: CIFRAR CONTRASEÑA
+    db.register_new_user(user_name.lower(), password)
+    return True
 
-def login_user():
-    db = DataBase()
-    tries = 3
-    fallo = False
-
-    name = input("(Escribe exit para salir)\nIntroduzca el nombre de usuario: ").lower()
-    while name != "exit" and db.search_user(name) is None:
-        name = input("(Escribe exit para salir)\nNombre de usuario no existe, introduzca un usuario válido.").lower()
-    if (name == "exit"):
-        return
-
-    password = input("Introduzca la contraseña: ") # TODO: cifrar
-    while not db.search_pw(password) and not fallo:
-        tries -= 1
-        if tries > 0:
-            password = input("Contraseña incorrecta, " + str(tries) + " intentos restantes. Introduzca la contraseña:")
-        else:
-            fallo = True
-    if fallo:
-        print("Demasiados intentos fallidos.")
-        return False
-    else:
-        user = User(name)
-        print("Bienvenido de vuelta,", name)
-        return user
+def login_user(user_name: str, pw: str):
+    db = DataBase() # TODO: cifrar contraseña
+    if db.search_user(user_name) and db.search_pw(pw):
+        print("usuario encontrado")
+        return User(user_name)
+    print("usuario no encontrado")
+    return None
 
 class User():
     def __init__(self, user_name):
@@ -244,3 +226,6 @@ class User():
         new_date = input("nueva fecha")
         db.delete_event(self.user_name, subject, old_date, 'PROJECT')
         db.register_new_event(self.user_name, subject, new_date,'PROJECT', -1)
+
+if __name__ == "__main__":
+    print("user")
