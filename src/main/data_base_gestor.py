@@ -114,6 +114,21 @@ class DataBase:
             self.base.commit()
             self.close()
 
+        def delete_subject_from_user(self, user_name: str, subj_to_erase: str):
+            self.open()
+            sql = ("DELETE FROM USER_EVENT WHERE USER_NAME=? AND SUBJECT=?",
+                   "DELETE FROM USER_SUBJ WHERE USER_NAME=? AND SUBJECT=?")
+            for i in range(len(sql)):
+                self.base.execute(sql[i], (user_name, subj_to_erase))
+            self.base.commit()
+            self.close()
+
+        def delete_event(self, user_name: str, subject: str, date: str, tipo: str):
+            self.open()
+            sql = "DELETE FROM USER_EVENT WHERE USER_NAME=? AND SUBJECT=? AND FECHA=? AND TIPO=?"
+            self.base.execute(sql, (user_name, subject, date, tipo))
+            self.base.commit()
+            self.close()
         def exams_from_subject(self, user:str, subject: str):
             """extrae una lista de todos los examens de un usuario dada una asignatura"""
             self.open()
