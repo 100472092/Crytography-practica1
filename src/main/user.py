@@ -1,6 +1,21 @@
 """this class encapsules user funtionality"""
 from data_base_gestor import DataBase
 
+
+class MyDict:
+    def __init__(self, data):
+        self.data: dict = data
+
+    def __str__(self):
+        out = ""
+        for i in self.data:
+            exams_i = self.data[i]
+            if len(exams_i) < 1:
+                exams_i = "sin examenes registrados..."
+            out += i + ": " + str(exams_i) + "\n"
+        print(out)
+        return out
+
 def register_user(user_name: str, password: str):
     db = DataBase()
 
@@ -22,6 +37,31 @@ def login_user(user_name: str, pw: str):
 class User():
     def __init__(self, user_name):
         self.user_name = user_name
+
+    @property
+    def exams(self):
+        db = DataBase()
+        dict_out = dict()
+        for i in db.subjects_from_user(self.user_name):
+            dict_out[i] = db.exams_from_subject(self.user_name, i)
+        print(dict_out)
+        return MyDict(dict_out)
+
+    @property
+    def projects(self):
+        db = DataBase()
+        dict_out = dict()
+        for i in db.subjects_from_user(self.user_name):
+            dict_out[i] = db.projects_from_subject(self.user_name, i)
+        print(dict_out)
+        return MyDict(dict_out)
+
+    @property
+    def subjects(self):
+        db = DataBase()
+        out = db.subjects_from_user(self.user_name)
+        print(out)
+        return out
 
     def functionality(self):
             user_choice = input(" 1: GESTIONAR ASIGNATURAS. \n 2: GESTIONAR EXAMENES. \n 3: GESTIONAR PROYECTOS. \n 4: EXIT \n")
@@ -114,40 +154,25 @@ class User():
 
     # TODO: generalizar selección de asignatura y examen
 
-    def add_exam(self, subject: str):
+    def add_exam(self, subject: str, date: str, nota: int = -1):
         db = DataBase()
         exams_lists = db.exams_from_subject(self.user_name, subject)
-        print(exams_lists)
-        fecha = input("Añada el día del examen [dd-mm-yyyy]") # TODO: REGEX TO VALIDATE DATE
+        # TODO: REGEX TO VALIDATE DATE
 
-        if fecha in exams_lists:
+        if date in exams_lists:
             print("Ese examen ya está registrado!!")
+            return False
         else:
-            add_mark = input("Quieres añadir una nota al examen?[Y/N]")
-            mark = -1
-            if add_mark == "Y":
-                try:
-                    mark = int(input("Nota del examen: "))
-                except:
-                    mark = -1
-                    print("Nota no válida, no se asignará nota")
-            db.register_new_event(self.user_name, subject, fecha, "EXAM", mark)
+            db.register_new_event(self.user_name, subject, date, "EXAM", nota)
+            return True
 
-    def modify_exam(self, subject: str):
+    def modify_exam(self, subject: str, old_date: str, new_subject, new_date, mark):
         db = DataBase()
-        selected = False
-        exams_lits = db.exams_from_subject(self.user_name, subject)
-        while not selected:
-            print(exams_lits)
-            old_date = input("Selecciona un examen: ")
-            if old_date in exams_lits:
-                selected = True
-            else:
-                print("No existe ese examen")
-
-        new_date = input("nueva fecha")
+        if subject not in self.subjects or old_date not in self.exams.data[subject]:
+            return False
         db.delete_event(self.user_name, subject, old_date, 'EXAM')
-        db.register_new_event(self.user_name, subject, new_date,'EXAM', -1)
+        db.register_new_event(self.user_name, new_subject, new_date, 'EXAM', mark)
+        return True
 
     def drop_exam(self, subject: str):
         db = DataBase()

@@ -171,15 +171,23 @@ class DataBase:
             data = [
                 ("pepe", "matematicas"),
                 ("pepe", "lengua"),
+                ("pepe", "naturales"),
+                ("pepe", "sociales"),
+                ("pepe", "ingles"),
+                ("pepe", "religion"),
+
                 ("juan", "filosofia")
             ]
             self.base.executemany("INSERT INTO USER_SUBJ (USER_NAME, SUBJECT) VALUES(?, ?)", data)
             data = [
-                ("pepe", "matematicas", "12-12-2012", "EXAM", 9),
-                ("pepe", "lengua", "01-01-2013", "EXAM", 9),
-                ("pepe", "lengua", "12-12-2012", "EXAM", 9),
-                ("pepe", "matematicas", "12-12-2012", "PROJECT", 7),
-                ("pepe", "lengua", "11-12-2012", "PROJECT", 6),
+                ("pepe", "matematicas", "2012-12-12", "EXAM", 9),
+                ("pepe", "lengua", "2013-12-12", "EXAM", 9),
+                ("pepe", "ingles", "2012-12-12", "EXAM", 9),
+                ("pepe", "naturales", "2012-12-12", "EXAM", 9),
+                ("pepe", "sociales", "2012-12-12", "EXAM", 9),
+
+                ("pepe", "matematicas", "2012-12-12", "PROJECT", 7),
+                ("pepe", "lengua", "2012-12-12", "PROJECT", 6),
 
             ]
             self.base.executemany("INSERT INTO USER_EVENT (USER_NAME, SUBJECT, FECHA, TIPO, NOTA) VALUES(?, ?, ?, ?, ?)", data)
