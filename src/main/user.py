@@ -174,20 +174,13 @@ class User():
         db.register_new_event(self.user_name, new_subject, new_date, 'EXAM', mark)
         return True
 
-    def drop_exam(self, subject: str):
+    def drop_exam(self, subject: str, date):
         db = DataBase()
-        selected = False
         exams_lits = db.exams_from_subject(self.user_name, subject)
-        while not selected:
-            print(exams_lits)
-            old_date = input("Selecciona un examen: ")
-            if old_date in exams_lits:
-                selected = True
-            else:
-                print("No existe ese examen")
-
-        db.delete_event(self.user_name, subject, old_date, 'EXAM')
-
+        if date not in exams_lits:
+            return False
+        db.delete_event(self.user_name, subject, date, 'EXAM')
+        return True
     def manage_projects(self):
         db = DataBase()
         subjects_list = db.subjects_from_user(self.user_name)

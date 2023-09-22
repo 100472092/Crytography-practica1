@@ -11,7 +11,7 @@ ERR_MSG_SIZE = constantes.ERR_MSG_SIZE
 
 
 class App:
-    curr_user = user.User("pepe")
+    curr_user = None
     password_tries = 3
     allow_mod = False
 
@@ -30,8 +30,8 @@ class App:
         self.error_stream.pack(side=BOTTOM, pady=0)
 
         # Primera escena
-        # self.log_in_scene(self.main_frame)
-        self.exam_scene(self.main_frame)
+        self.log_in_scene(self.main_frame)
+        # self.exam_scene(self.main_frame)
         # bucle principal
         self.root.mainloop()
 
@@ -114,6 +114,16 @@ class App:
         else:
             err_channel.config(text="Selecciona primero un examen", fg='red')
 
+    def app_delete_exam(self, subject, date, channel, exams):
+        valid, err_msg = self.validate_data(subject, date)
+        if not valid:
+            channel.config(text=err_msg, fg='red')
+            return
+        if date in self.curr_user.exams.data[subject]:
+            if not self.curr_user.drop_exam(subject, date):
+                print("Fecha que no existe")
+            channel.config(text="Examen eliminado", fg='green')
+            exams.config(text=self.curr_user.exams)
 
     # == TRANSICIONES ==
     def change_to_log_in(self, frame):
@@ -144,6 +154,11 @@ class App:
         self.error_stream_restore()
         frame.destroy()
         self.modify_exam_scene(self.main_frame)
+
+    def change_to_delete_exam_scene(self, frame):
+        self.error_stream_restore()
+        frame.destroy()
+        self.delete_exam_scene(self.main_frame)
 
     # == ESCENAS ==
     def log_in_scene(self, root):
@@ -347,6 +362,41 @@ class App:
         quit_button.pack(pady=20)
 
         exams_frame.grid(padx=5, ipady=97, row=1, column=1)
+        sub_title.pack()
+        exams.pack()
+
+    def delete_exam_scene(self, root):
+        main_frame = Frame(root, borderwidth=constantes.FRAME_BORDERWIDTH, relief="groove")
+        main_frame.pack()
+        tittle = Label(main_frame, text="Eliminar Exámenes", font=(constantes.TITTLE_FONT, TITTLE_SIZE))
+        tittle.grid(row=0, column=0, columnspan=2)
+        err_comunication = Label(main_frame, text="", font=(constantes.SUBTITLE_FONT, ERR_MSG_SIZE), pady=10)
+
+        exams_frame = Frame(main_frame, borderwidth=3, relief="groove")
+        sub_title = Label(exams_frame, text="Tus exámenes:\t\t", justify=LEFT, font=(SUBTITLE_SIZE, SUBTITLE_SIZE))
+        exams = Label(exams_frame, text=self.curr_user.exams.__str__(), justify=LEFT)
+
+        sub_frame = Frame(main_frame, borderwidth=constantes.FRAME_BORDERWIDTH, relief="groove", padx=5, pady=5)
+        sub_frame.grid(row=1, column=0, ipady=23)
+        subj_label = Label(sub_frame, text="Asignatura*")
+        date_label = Label(sub_frame, text="Fecha*")
+        subj_label.grid(row=0, column=0)
+        date_label.grid(row=1, column=0)
+        subj_box = Entry(sub_frame)
+        date_box = Entry(sub_frame)
+        subj_box.grid(row=0, column=1)
+        date_box.grid(row=1, column=1)
+        buttons_frame = Frame(sub_frame)
+        buttons_frame.grid(row=3, column=0, columnspan=2)
+        confirm_button = Button(buttons_frame, text="DELETE",
+                                command=lambda: self.app_delete_exam(subj_box.get(), date_box.get(),
+                                                                     err_comunication, exams))
+        quit_button = Button(buttons_frame, text="QUIT", command=lambda: self.change_to_user_functionality(main_frame))
+        confirm_button.pack(side="left", pady=5)
+        quit_button.pack(side="right", pady=5)
+
+        err_comunication.grid(row=2, column=0, columnspan=2)
+        exams_frame.grid(row=1, column=1)
         sub_title.pack()
         exams.pack()
 
