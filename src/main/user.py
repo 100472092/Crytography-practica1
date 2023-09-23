@@ -20,7 +20,7 @@ class MyDict:
 def register_user(user_name: str, password: str):
     db = DataBase()
 
-    if user_name == "" or not db.search_user(user_name.lower()) or password == "":
+    if user_name == "" or db.search_user(user_name.lower()) or password == "":
         print("Register_user: No se pudo registrar al usuario (bad_name)")
         return
     # TODO: CIFRAR CONTRASEÑA
