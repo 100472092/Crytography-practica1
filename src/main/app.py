@@ -1,9 +1,10 @@
-import user
-import constantes
-from tkinter import *
-from tkinter import ttk
 import time
 import re
+from tkinter import *
+from tkinter import ttk
+
+import user
+import constantes
 
 TITTLE_SIZE = constantes.TITTLE_SIZE
 SUBTITLE_SIZE = constantes.SUBTITLE_SIZE
@@ -11,7 +12,7 @@ ERR_MSG_SIZE = constantes.ERR_MSG_SIZE
 
 
 class App:
-    curr_user = None
+    curr_user = user.User("pepe")
     password_tries = 3
     allow_mod = False
 
@@ -30,23 +31,72 @@ class App:
         self.error_stream.pack(side=BOTTOM, pady=0)
 
         # Primera escena
-        self.log_in_scene(self.main_frame)
-        # self.exam_scene(self.main_frame)
+        # self.log_in_scene(self.main_frame)
+        self.add_subject_scene(self.main_frame)
         # bucle principal
         self.root.mainloop()
+
+    # == VALIDATE DATA ==
+    def validate_subject(self, subject, ev_existence=False):
+        if len(subject) <= 0:
+            return False, "campo de asignatura vacío"
+        if ev_existence:
+            if subject not in self.curr_user.subjects:
+                return False, "asignatura no existente"
+        if len(subject) > 15:
+            return False, "nombre de asignatura demasiado largo"
+        return True, ""
+
+    @staticmethod
+    def validate_date(date):
+        if not re.match(r"^(2[0-9]{3})(-)(1[0-2]|0[1-9])(-)(3[01]|[12][0-9]|0[1-9])$", date):
+            err_msg = "Fecha no válida"
+            return False, err_msg
+        return True, ""
+
+    def validate_date_existence(self, date, subject, tipo):
+        valid_s, err_msg = self.validate_subject(subject, True)
+        if not valid_s:
+            print("Fatal_error: mal llamado a la función " + err_msg)
+            return valid_s, err_msg
+        valid, err_msg = self.validate_date(date)
+        if not valid:
+            return valid, err_msg
+        if tipo == 'EXAM':
+            if date not in self.curr_user.exams.data[subject]:
+                return False, "no existe ese examen"
+        elif tipo == 'PROJECT':
+            if date not in self.curr_user.projects.data[subject]:
+                return False, "no existe ese proyecto"
+        else:
+            print("Fatal error: mal llamado a la función")
+            return None
+        return True, ""
+
+    def validate_mark(self, mark):
+        try:
+            if mark == "":
+                return True, ""
+            mark = int(mark)
+            if mark < 0:
+                return False, "La nota debe ser mayor o igual que 0"
+        except:
+            return False, "La nota debe ser un número entero"
+        return True, ""
 
     # == FUNCIONALIDAD ==
     def error_stream_restore(self):
         self.error_stream.config(text="")
 
     def app_login_user(self, user_name, password, label, frame):
+        label.config(text="")
         if self.password_tries > 0:
             self.password_tries -= 1
             if self.password_tries == 0:
-                print("warning_message")
+                print("warning_message: fallos por numero de intentos")
                 self.error_stream.config(text="Si fallas una vez más\nla aplicación se bloqueará 5 segundos")
         else:
-            print("demasiados intentos:")
+            print("Aplicación bloqueada: demasiados intentos")
             frame.destroy()
             time.sleep(5)
             self.log_in_scene(self.main_frame)
@@ -59,71 +109,92 @@ class App:
         self.change_to_user_functionality(frame)
 
     def app_register_user(self, user_name, password, frame, root, bad_label):
-
+        bad_label.config(text="")
         if not user.register_user(user_name, password):
             bad_label.config(text="bad name", font=(constantes.ERR_FONT, ERR_MSG_SIZE))
             return
         frame.destroy()
         self.log_in_scene(root)
 
-    def validate_data(self, subject, date, nota=0):
-        err_msg = ""
-        if not len(subject) > 0 or subject not in self.curr_user.subjects:
-            err_msg = "asignatura no válida"
-            return False, err_msg
-        if not re.match(r"^(2[0-9]{3})(-)(1[0-2]|0[1-9])(-)(3[01]|[12][0-9]|0[1-9])$", date):
-            err_msg = "Fecha no válida"
-            return False, err_msg
-        try:
-            if nota == "":
-                return True, err_msg
-            nota = int(nota)
-            if nota < 0:
-                err_msg = "La nota debe ser mayor o igual que 0"
-                return False, err_msg
-        except:
-            err_msg = "La nota debe ser un número entero"
-            return False, err_msg
-        return True, err_msg
-
     def app_add_exam(self, subject: str, date, nota, channel, exams):
-        valid, err_msg = self.validate_data(subject, date, nota)
-        # Nota no es campo obligatorio
+        valid_s, err_msg = self.validate_subject(subject, True)
+        if not valid_s:
+            channel.config(text=err_msg, fg="red")
+            return
+        valid_s, err_msg = self.validate_date(date)
+        if not valid_s:
+            channel.config(text=err_msg, fg="red")
+            return
+        valid_s, err_msg = self.validate_mark(nota)
+        if not valid_s:
+            channel.config(text=err_msg, fg='red')
+            return
         if nota == "":
             nota = -1
-        if valid and self.curr_user.add_exam(subject, date, nota):
+        if self.curr_user.add_exam(subject, date, nota):
             channel.config(text="Examen añadido", fg='green')
         else:
-            channel.config(text=err_msg, fg="red")
+            channel.config(text="Examen ya registrado", fg="red")
         exams.config(text=self.curr_user.exams)
 
-    def app_modify_exam(self, old_subject, old_date, new_subject, new_date, mark, err_channel, exams):
+    def app_modify_exam(self, old_subject, old_date, new_subject, new_date, mark, channel, exams):
+        channel.config(text="")
         if self.allow_mod:
-            valid, err_msg = self.validate_data(new_subject, new_date, mark)
-            if not valid:
-                err_channel.config(text=err_msg, fg='red')
+            valid_s, err_msg = self.validate_subject(new_subject, False)
+            if not valid_s:
+                channel.config(text=err_msg, fg="red")
                 return
-            if new_date not in self.curr_user.exams.data[new_subject]:
-                if not self.curr_user.modify_exam(old_subject, old_date, new_subject, new_date, mark):
-                    print("FATAL ERROR: FALLO EN LA MODIFICACIÓN EN LA BASE DE DATOS")
-                    return
-                exams.config(text=self.curr_user.exams)
-                err_channel.config(text='Examen modificado', fg='green')
-            else:
-                err_channel.config(text='Ya existe ese examen', fg='red')
+            valid_s, err_msg = self.validate_date(new_date)
+            if not valid_s:
+                channel.config(text=err_msg, fg="red")
+                return
+            valid_s, err_msg = self.validate_mark(mark)
+            if not valid_s:
+                channel.config(text=err_msg, fg='red')
+                return
+            if mark == "":
+                mark = -1
+            if not self.curr_user.modify_exam(old_subject, old_date, new_subject, new_date, mark):
+                print("FATAL ERROR: FALLO EN LA MODIFICACIÓN EN LA BASE DE DATOS")
+                return
+            exams.config(text=self.curr_user.exams.__str__())
+            channel.config(text='Examen modificado', fg='green')
         else:
-            err_channel.config(text="Selecciona primero un examen", fg='red')
+            channel.config(text="Selecciona primero un examen", fg='red')
 
     def app_delete_exam(self, subject, date, channel, exams):
-        valid, err_msg = self.validate_data(subject, date)
+        channel.config(text="")
+        valid, err_msg = self.validate_date_existence(date, subject, 'EXAM')
         if not valid:
             channel.config(text=err_msg, fg='red')
             return
         if date in self.curr_user.exams.data[subject]:
             if not self.curr_user.drop_exam(subject, date):
-                print("Fecha que no existe")
+                # si saltan estos print quiere decir que hubo un error en comprobaciones anteriores
+                print("Fatal error: fecha que no existe")
             channel.config(text="Examen eliminado", fg='green')
             exams.config(text=self.curr_user.exams)
+
+    def app_add_subject(self, subject, channel, subjects):
+        channel.config(text="")
+        valid, err_msg = self.validate_subject(subject)
+        if not valid:
+            channel.config(text=err_msg, fg='red')
+            return
+        if subject in self.curr_user.subjects:
+            channel.config(text="Esa asignatura ya existe", fg='red')
+            return
+        if not self.curr_user.add_subject(subject):
+            print("Fatal error: la asignatura ya existe")
+        subjects.config(text=self.curr_user.str_subjects())
+
+    def app_delete_subject(self, subject, channel, subjects_frame):
+        valid, err_msg = self.validate_subject(subject, True)
+        if not valid:
+            channel.config(text=err_msg, fg='red')
+            return
+        self.curr_user.drop_subject(subject)
+        subjects_frame.config(text=self.curr_user.str_subjects())
 
     # == TRANSICIONES ==
     def change_to_log_in(self, frame):
@@ -159,6 +230,21 @@ class App:
         self.error_stream_restore()
         frame.destroy()
         self.delete_exam_scene(self.main_frame)
+
+    def change_to_subject_scene(self, frame):
+        self.error_stream_restore()
+        frame.destroy()
+        self.subject_scene(self.main_frame)
+
+    def change_to_add_subj_scene(self, frame):
+        self.error_stream_restore()
+        frame.destroy()
+        self.add_subject_scene(self.main_frame)
+
+    def change_to_delete_subj_scene(self, frame):
+        self.error_stream_restore()
+        frame.destroy()
+        self.delete_subject_scene(self.main_frame)
 
     # == ESCENAS ==
     def log_in_scene(self, root):
@@ -224,17 +310,18 @@ class App:
         sub_frame.grid(row=1, column=0)
         sub_title = Label(sub_frame, text="Qué quiere consultar?", font=(constantes.SUBTITLE_FONT, SUBTITLE_SIZE))
         sub_title.grid(row=0, column=0, columnspan=3, pady=10)
-        subj_button = Button(sub_frame, text="Asignaturas")
+        subj_button = Button(sub_frame, text="Asignaturas", command=lambda: self.change_to_subject_scene(main_frame))
         subj_button.grid(row=1, column=0)
         exams_button = Button(sub_frame, text="Exams", command=lambda: self.change_to_exam_scene(main_frame))
         exams_button.grid(row=1, column=1, ipadx=20)
-        project_button = Button(sub_frame, text="Projects", padx=15)
+        project_button = Button(sub_frame, text="Projects", padx=15,
+                                command=lambda: self.change_to_project_scene(main_frame))
         project_button.grid(row=1, column=2, ipadx=16)
         exit_button = Button(sub_frame, text="Salir", command=lambda: self.change_to_log_in(main_frame))
         exit_button.grid(row=2, column=1, pady=50)
 
-    def exam_scene(self, frame):
-        main_frame = ttk.Frame(frame)
+    def exam_scene(self, root):
+        main_frame = ttk.Frame(root)
         main_frame.pack()
         tittle = Label(main_frame, text="Gestión de exámenes", font=(constantes.TITTLE_FONT, TITTLE_SIZE))
         tittle.pack(pady=10, fill="x")
@@ -258,9 +345,9 @@ class App:
         quit_button.pack()
 
     def add_exam_scene(self, root):
-        main_frame = Frame(root, borderwidth=constantes.FRAME_BORDERWIDTH, relief="groove")
+        main_frame = Frame(root)
         main_frame.pack()
-        tittle = Label(main_frame, text="Añadir", font=(constantes.TITTLE_FONT, TITTLE_SIZE))
+        tittle = Label(main_frame, text="Añadir Exámenes", font=(constantes.TITTLE_FONT, TITTLE_SIZE))
         tittle.grid(row=0, column=0, columnspan=2)
         err_comunication = Label(main_frame, text="", font=(constantes.SUBTITLE_FONT, ERR_MSG_SIZE), pady=10)
 
@@ -299,7 +386,7 @@ class App:
     def modify_exam_scene(self, root):
         main_frame = Frame(root)
         main_frame.pack()
-        tittle = Label(main_frame, text="Modificar", font=(constantes.TITTLE_FONT, TITTLE_SIZE))
+        tittle = Label(main_frame, text="Modificar Exámenes", font=(constantes.TITTLE_FONT, TITTLE_SIZE))
         tittle.grid(row=0, column=0, columnspan=2, ipady=10)
         body_frame = Frame(main_frame, borderwidth=constantes.FRAME_BORDERWIDTH, relief="groove")
         body_frame.grid(row=1, column=0)
@@ -366,7 +453,7 @@ class App:
         exams.pack()
 
     def delete_exam_scene(self, root):
-        main_frame = Frame(root, borderwidth=constantes.FRAME_BORDERWIDTH, relief="groove")
+        main_frame = Frame(root)
         main_frame.pack()
         tittle = Label(main_frame, text="Eliminar Exámenes", font=(constantes.TITTLE_FONT, TITTLE_SIZE))
         tittle.grid(row=0, column=0, columnspan=2)
@@ -400,16 +487,108 @@ class App:
         sub_title.pack()
         exams.pack()
 
+    def subject_scene(self, root):
+        main_frame = ttk.Frame(root)
+        main_frame.pack()
+        tittle = Label(main_frame, text="Gestión de asignaturas", font=(constantes.TITTLE_FONT, TITTLE_SIZE))
+        tittle.pack(pady=10, fill="x")
+        sub_frame = ttk.Frame(main_frame, borderwidth=constantes.FRAME_BORDERWIDTH, relief="groove")
+        sub_frame.pack()
+        sub_title = Label(sub_frame, text="Tus Asignaturas:\t", justify=LEFT,
+                          font=(constantes.SUBTITLE_FONT, SUBTITLE_SIZE))
+        sub_title.pack()
+        subjects = Label(sub_frame, text=self.curr_user.str_subjects(), justify=LEFT)
+        subjects.pack()
+        actions_frame = ttk.Frame(main_frame)
+        actions_frame.pack()
+        add_button = Button(actions_frame, text="ADD", command=lambda: self.change_to_add_subj_scene(main_frame))
+        add_button.grid(row=0, column=0)
+        del_button = Button(actions_frame, text="DELETE", command=lambda: self.change_to_delete_subj_scene(main_frame))
+        del_button.grid(row=0, column=1)
+        quit_button = Button(main_frame, text="BACK", command=lambda: self.change_to_user_functionality(main_frame))
+        quit_button.pack()
+
+    def add_subject_scene(self, root):
+        main_frame = Frame(root)
+        main_frame.pack()
+        tittle = Label(main_frame, text="Añadir Asignatura", font=(constantes.TITTLE_FONT, TITTLE_SIZE))
+        tittle.grid(row=0, column=0, columnspan=2)
+        err_comunication = Label(main_frame, text="", font=(constantes.SUBTITLE_FONT, ERR_MSG_SIZE), pady=10)
+
+        body_frame = Frame(main_frame)
+        body_frame.grid(row=1, column=0, pady=20)
+
+        subjects_frame = Frame(body_frame, borderwidth=3, relief="groove")
+        sub_title = Label(subjects_frame, text="Tus asignaturas:\t", justify=LEFT, font=(SUBTITLE_SIZE, SUBTITLE_SIZE))
+        subjects = Label(subjects_frame, text=self.curr_user.str_subjects(), justify=LEFT)
+
+        sub_frame = Frame(body_frame, borderwidth=constantes.FRAME_BORDERWIDTH, relief="groove", padx=5, pady=5)
+        sub_frame.grid(row=1, column=0, ipady=23, pady=20)
+        subj_label = Label(sub_frame, text="Asignatura*")
+        subj_label.grid(row=0, column=0)
+        subj_box = Entry(sub_frame)
+        subj_box.grid(row=0, column=1)
+
+        buttons_frame = Frame(sub_frame)
+        buttons_frame.grid(row=3, column=0, columnspan=2)
+        confirm_button = Button(buttons_frame, text="ADD",
+                                command=lambda: self.app_add_subject(subj_box.get(),
+                                                                     err_comunication, subjects))
+        quit_button = Button(buttons_frame, text="QUIT", command=lambda: self.change_to_user_functionality(main_frame))
+        confirm_button.pack(side="left", pady=5)
+        quit_button.pack(side="right", pady=5)
+
+        err_comunication.grid(row=2, column=0, columnspan=2)
+        subjects_frame.grid(row=1, column=1)
+        sub_title.pack()
+        subjects.pack()
+
+    def delete_subject_scene(self, root):
+        main_frame = Frame(root)
+        main_frame.pack()
+        tittle = Label(main_frame, text="Eliminar Asignatura", font=(constantes.TITTLE_FONT, TITTLE_SIZE))
+        tittle.grid(row=0, column=0, columnspan=2)
+        err_comunication = Label(main_frame, text="", font=(constantes.SUBTITLE_FONT, ERR_MSG_SIZE), pady=10)
+
+        body_frame = Frame(main_frame)
+        body_frame.grid(row=1, column=0, pady=20)
+
+        subjects_frame = Frame(body_frame, borderwidth=3, relief="groove")
+        sub_title = Label(subjects_frame, text="Tus asignaturas:\t", justify=LEFT, font=(SUBTITLE_SIZE, SUBTITLE_SIZE))
+        subjects = Label(subjects_frame, text=self.curr_user.str_subjects(), justify=LEFT)
+
+        sub_frame = Frame(body_frame, borderwidth=constantes.FRAME_BORDERWIDTH, relief="groove", padx=5, pady=5)
+        sub_frame.grid(row=1, column=0, ipady=23, pady=20)
+        subj_label = Label(sub_frame, text="Asignatura*")
+        subj_label.grid(row=0, column=0)
+        subj_box = Entry(sub_frame)
+        subj_box.grid(row=0, column=1)
+
+        buttons_frame = Frame(sub_frame)
+        buttons_frame.grid(row=3, column=0, columnspan=2)
+        confirm_button = Button(buttons_frame, text="DELETE",
+                                command=lambda: self.app_delete_subject(subj_box.get(),
+                                                                        err_comunication, subjects))
+        quit_button = Button(buttons_frame, text="QUIT", command=lambda: self.change_to_user_functionality(main_frame))
+        confirm_button.pack(side="left", pady=5)
+        quit_button.pack(side="right", pady=5)
+
+        err_comunication.grid(row=2, column=0, columnspan=2)
+        subjects_frame.grid(row=1, column=1)
+        sub_title.pack()
+        subjects.pack()
+        warning_label = Label(main_frame,
+            text="Si eliminas una asignatura, se borrarán todos los examenes y proyectos asociados a ella",
+                              font=(constantes.ERR_FONT, constantes.WARNING_SIZE), fg='black')
+        warning_label.grid(row=3, column=0, columnspan=2)
+
     # == FUNCIONES AUXILIARES PARA BOTONES ==
     def apply_selection(self, subject, date, channel, old_subject_box, old_date_box, old_mark_box):
-        valid, err_msg = self.validate_data(subject, date)
+        valid_s, err_msg = self.validate_date_existence(date, subject, 'EXAM')
+        if not valid_s:
+            channel.config(text=err_msg)
+            return
 
-        if not valid:
-            channel.config(text=err_msg, fg='red')
-            return
-        if date not in self.curr_user.exams.data[subject]:
-            channel.config(text="Fecha no valida ", fg='red')
-            return
         self.allow_mod = True
         channel.config(text="aplicando selección", fg="green")
         old_subject_box.config(state='normal')
@@ -420,7 +599,7 @@ class App:
         old_mark_box.delete(0, END)
         old_subject_box.insert(0, subject)
         old_date_box.insert(0, date)
-        old_mark_box.insert(0, str(0))
+        old_mark_box.insert(0, self.curr_user.check_event_mark(subject, date, 'EXAM'))
         old_subject_box.config(state=DISABLED)
         old_date_box.config(state=DISABLED)
         old_mark_box.config(state=DISABLED)

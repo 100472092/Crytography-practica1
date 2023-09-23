@@ -13,14 +13,13 @@ class MyDict:
             if len(exams_i) < 1:
                 exams_i = "sin examenes registrados..."
             out += i + ": " + str(exams_i) + "\n"
-        print(out)
         return out
 
 def register_user(user_name: str, password: str):
     db = DataBase()
 
-    if user_name == "" or db.search_user(user_name.lower()) or password == "":
-        print("bad name")
+    if user_name == "" or not db.search_user(user_name.lower()) or password == "":
+        print("Register_user: No se pudo registrar al usuario (bad_name)")
         return
     # TODO: CIFRAR CONTRASEÑA
     db.register_new_user(user_name.lower(), password)
@@ -29,9 +28,9 @@ def register_user(user_name: str, password: str):
 def login_user(user_name: str, pw: str):
     db = DataBase() # TODO: cifrar contraseña
     if db.search_user(user_name) and db.search_pw(pw):
-        print("usuario encontrado")
+        print("log_in: Usuario encontrado")
         return User(user_name)
-    print("usuario no encontrado")
+    print("log_in: Usuario no encontrado")
     return None
 
 class User():
@@ -44,7 +43,6 @@ class User():
         dict_out = dict()
         for i in db.subjects_from_user(self.user_name):
             dict_out[i] = db.exams_from_subject(self.user_name, i)
-        print(dict_out)
         return MyDict(dict_out)
 
     @property
@@ -53,14 +51,12 @@ class User():
         dict_out = dict()
         for i in db.subjects_from_user(self.user_name):
             dict_out[i] = db.projects_from_subject(self.user_name, i)
-        print(dict_out)
         return MyDict(dict_out)
 
     @property
     def subjects(self):
         db = DataBase()
         out = db.subjects_from_user(self.user_name)
-        print(out)
         return out
 
     def functionality(self):
@@ -99,29 +95,24 @@ class User():
                 case _:
                     print("Acción no validad")
 
-    def add_subject(self):
+    def add_subject(self, new_subject):
         db = DataBase()
-        new_subject = input("Escriba asignatura a añadir: ").lower()
+        new_subject = new_subject.lower()
         # TODO: Añadir salida
         if db.search_subject(self.user_name, new_subject):
-            print("Asignatura ya existente!")
-            return
-        print("Registrar asignatura")
+            print("ADD_SUBJECT: Asignatura ya existente!")
+            return False
+        print("ADD_SUBJECT: asignatura añadida")
         db.register_new_subject(self.user_name, new_subject.lower())
+        return True
 
-    def drop_subject(self):
+    def drop_subject(self, subject):
         db = DataBase()
-        exists = False
         subjects_list = db.subjects_from_user(self.user_name)
-        while not exists:
-            print("Asignaturas: ", subjects_list)
-            subj_to_erase = input("Asignatura que desea eliminar: ")
-            if subj_to_erase.lower() in subjects_list:
-                exists = True
-            else:
-                print("Esa asignatura no existe")
-
-        db.delete_subject_from_user(self.user_name, subj_to_erase)
+        if not subject.lower() in subjects_list:
+            print("DROP_SUBJECT: ASIGNATURA NO EXISTE!!")
+        print("DROP_SUBJECT: ASIGNATURA ELIMINADA")
+        db.delete_subject_from_user(self.user_name, subject)
 
     def manage_exams(self):
         db = DataBase()
@@ -173,6 +164,13 @@ class User():
         db.delete_event(self.user_name, subject, old_date, 'EXAM')
         db.register_new_event(self.user_name, new_subject, new_date, 'EXAM', mark)
         return True
+
+    def check_event_mark(self, subject: str, date: str, tipo: str):
+        db = DataBase()
+        if subject not in self.subjects or date not in self.exams.data[subject]:
+            print("Error: No existe el examen especificado")
+            return False
+        return db.search_exam(self.user_name, subject, date, tipo).pop()[-1]
 
     def drop_exam(self, subject: str, date):
         db = DataBase()
@@ -244,6 +242,12 @@ class User():
         new_date = input("nueva fecha")
         db.delete_event(self.user_name, subject, old_date, 'PROJECT')
         db.register_new_event(self.user_name, subject, new_date,'PROJECT', -1)
+
+    def str_subjects(self):
+        out = ""
+        for s in self.subjects:
+            out += s + ": " + str(len(self.exams.data[s])) + " examene(s)\n"
+        return out
 
 if __name__ == "__main__":
     print("user")

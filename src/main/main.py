@@ -6,6 +6,7 @@ from app import App
 def main():
     # Sino existe, inicializa la base de datos
     if not os.path.exists(os.path.dirname(__file__)[:-4] + "storage"):
+        print("Creando base de datos...")
         os.makedirs(os.path.dirname(__file__)[:-4] + "storage", mode=0o777, exist_ok=False)
         DataBase().initialize()
 

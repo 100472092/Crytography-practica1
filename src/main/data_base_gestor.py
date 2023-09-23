@@ -90,6 +90,13 @@ class DataBase:
                 return subject
             return None
 
+        def search_exam(self, user_name: str, subject, date: str, tipo: str):
+            self.open()
+            sql = "SELECT * FROM USER_EVENT WHERE USER_NAME=? AND SUBJECT=? AND FECHA=? AND TIPO=?"
+            data = self.base.execute(sql, (user_name, subject, date, tipo))
+            data = data.fetchall()
+            return data
+
         def register_new_user(self, user: str, password_token: str):
             """annade un nuevo usuario a la base de datos"""
             self.open()
