@@ -90,7 +90,7 @@ class DataBase:
                 return subject
             return None
 
-        def search_exam(self, user_name: str, subject, date: str, tipo: str):
+        def search_event(self, user_name: str, subject, date: str, tipo: str):
             self.open()
             sql = "SELECT * FROM USER_EVENT WHERE USER_NAME=? AND SUBJECT=? AND FECHA=? AND TIPO=?"
             data = self.base.execute(sql, (user_name, subject, date, tipo))

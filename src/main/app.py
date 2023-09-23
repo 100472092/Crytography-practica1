@@ -236,7 +236,7 @@ class App:
                 return
             if mark == "":
                 mark = -1
-            if not self.curr_user.modify_exam(old_subject, old_date, new_subject, new_date, mark):
+            if not self.curr_user.modify_project(old_subject, old_date, new_subject, new_date, mark):
                 print("FATAL ERROR: FALLO EN LA MODIFICACIÓN EN LA BASE DE DATOS")
                 return
             projects.config(text=self.curr_user.projects.__str__())
@@ -284,6 +284,7 @@ class App:
         self.add_exam_scene(self.main_frame)
 
     def change_to_modify_exam_scene(self, frame):
+        self.allow_mod = False
         self.error_stream_restore()
         frame.destroy()
         self.modify_exam_scene(self.main_frame)
@@ -319,6 +320,7 @@ class App:
         self.add_project_scene(self.main_frame)
 
     def change_to_modify_project_scene(self, frame):
+        self.allow_mod = False
         self.error_stream_restore()
         frame.destroy()
         self.modify_project_scene(self.main_frame)
@@ -838,7 +840,7 @@ class App:
     def apply_selection_exam(self, subject, date, channel, old_subject_box, old_date_box, old_mark_box):
         valid_s, err_msg = self.validate_date_existence(date, subject, 'EXAM')
         if not valid_s:
-            channel.config(text=err_msg)
+            channel.config(text=err_msg, fg='red')
             return
 
         self.allow_mod = True
@@ -859,7 +861,7 @@ class App:
     def apply_selection_project(self, subject, date, channel, old_subject_box, old_date_box, old_mark_box):
         valid_s, err_msg = self.validate_date_existence(date, subject, 'PROJECT')
         if not valid_s:
-            channel.config(text=err_msg)
+            channel.config(text=err_msg, fg='red')
             return
 
         self.allow_mod = True

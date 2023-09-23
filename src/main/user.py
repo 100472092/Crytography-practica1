@@ -16,6 +16,7 @@ class MyDict:
             out += i + ": " + str(exams_i) + "\n"
         return out
 
+
 def register_user(user_name: str, password: str):
     db = DataBase()
 
@@ -26,13 +27,15 @@ def register_user(user_name: str, password: str):
     db.register_new_user(user_name.lower(), password)
     return True
 
+
 def login_user(user_name: str, pw: str):
-    db = DataBase() # TODO: cifrar contraseña
+    db = DataBase()  # TODO: cifrar contraseña
     if db.search_user(user_name) and db.search_pw(pw):
         print("log_in: Usuario encontrado")
         return User(user_name)
     print("log_in: Usuario no encontrado")
     return None
+
 
 class User():
     def __init__(self, user_name):
@@ -61,21 +64,22 @@ class User():
         return out
 
     def functionality(self):
-            user_choice = input(" 1: GESTIONAR ASIGNATURAS. \n 2: GESTIONAR EXAMENES. \n 3: GESTIONAR PROYECTOS. \n 4: EXIT \n")
-            match user_choice:
-                case "1":
-                    self.manage_subject()
-                    return 1
-                case "2":
-                    self.manage_exams()
-                    return 1
-                case "3":
-                    self.manage_projects()
-                    return 1
-                case "4":
-                    return 0
-                case _:
-                    print("Error: Acción no válidad")
+        user_choice = input(
+            " 1: GESTIONAR ASIGNATURAS. \n 2: GESTIONAR EXAMENES. \n 3: GESTIONAR PROYECTOS. \n 4: EXIT \n")
+        match user_choice:
+            case "1":
+                self.manage_subject()
+                return 1
+            case "2":
+                self.manage_exams()
+                return 1
+            case "3":
+                self.manage_projects()
+                return 1
+            case "4":
+                return 0
+            case _:
+                print("Error: Acción no válidad")
 
     def manage_subject(self):
         exit_v = False
@@ -166,10 +170,17 @@ class User():
 
     def check_event_mark(self, subject: str, date: str, tipo: str):
         db = DataBase()
-        if subject not in self.subjects or date not in self.exams.data[subject]:
-            print("Error: No existe el examen especificado")
+        if tipo == 'EXAM':
+            valid = (subject not in self.subjects or date not in self.exams.data[subject])
+        elif tipo == 'PROJECT':
+            valid = (subject not in self.subjects or date not in self.projects.data[subject])
+        else:
+            print("FATAL ERROR: CHECK_EVENT_MARK")
             return False
-        return db.search_exam(self.user_name, subject, date, tipo).pop()[-1]
+        if valid:
+            print("Error: No existe el " + tipo + " especificado")
+            return False
+        return db.search_event(self.user_name, subject, date, tipo).pop()[-1]
 
     def drop_exam(self, subject: str, date):
         db = DataBase()
@@ -178,6 +189,7 @@ class User():
             return False
         db.delete_event(self.user_name, subject, date, 'EXAM')
         return True
+
     def manage_projects(self):
         db = DataBase()
         subjects_list = db.subjects_from_user(self.user_name)
@@ -190,7 +202,8 @@ class User():
         print("TUS PROYECTOS:", db.projects_from_subject(self.user_name, subject))
         exit_v = False
         while not exit_v:
-            user_choice = input(" 1: AÑADIR PROYECTO.\n 2: MODIFICAR FECHA DE ENTREGA\n 3: ELIMINAR PROYECTO\n 4: EXIT\n")
+            user_choice = input(
+                " 1: AÑADIR PROYECTO.\n 2: MODIFICAR FECHA DE ENTREGA\n 3: ELIMINAR PROYECTO\n 4: EXIT\n")
             match user_choice:
                 case "1":
                     self.add_project(subject)
@@ -216,28 +229,20 @@ class User():
             db.register_new_event(self.user_name, subject, fecha, "PROJECT", mark)
             return True
 
-    def modify_project(self, subject: str):
+    def modify_project(self, subject: str, old_date, new_subject, new_date, mark):
         db = DataBase()
-        selected = False
-        project_list = db.projects_from_subject(self.user_name, subject)
-        while not selected:
-            print(project_list)
-            old_date = input("Selecciona un proyecto: ")
-            if old_date in project_list:
-                selected = True
-            else:
-                print("No existe ese proyecto")
-
-        new_date = input("nueva fecha")
+        if subject not in self.subjects or old_date not in self.projects.data[subject]:
+            return False
         db.delete_event(self.user_name, subject, old_date, 'PROJECT')
-        db.register_new_event(self.user_name, subject, new_date,'PROJECT', -1)
+        db.register_new_event(self.user_name, new_subject, new_date, 'PROJECT', mark)
+        return True
 
     def drop_project(self, subject: str, date):
         db = DataBase()
         project_list = db.projects_from_subject(self.user_name, subject)
         if date not in project_list:
             return False
-        print("projecto eliminado")
+        print("DROP_PROJECT: projecto eliminado")
         db.delete_event(self.user_name, subject, date, 'PROJECT')
         return True
 
@@ -247,5 +252,6 @@ class User():
             out += s + ": " + str(len(self.exams.data[s])) + " examene(s)\n"
         return out
 
-if __name__ == "__main__":
-    print("user")
+
+if __name__ == '__main__':
+    pass
