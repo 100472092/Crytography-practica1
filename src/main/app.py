@@ -523,9 +523,9 @@ class App:
         new_mark_box.grid(row=3, column=2)
 
         save_button = Button(change_frame, text="Guardar",
-                             command=lambda: self.app_modify_project(old_subj_box.get(), old_date_box.get(),
-                                                                     new_subj_box.get(), new_date_box.get(),
-                                                                     new_mark_box.get(), err_communication, exams))
+                             command=lambda: self.app_modify_exam(old_subj_box.get(), old_date_box.get(),
+                                                                  new_subj_box.get(), new_date_box.get(),
+                                                                  new_mark_box.get(), err_communication, exams))
         save_button.grid(row=4, column=0, columnspan=3, pady=10)
 
         quit_button = Button(body_frame, text="QUIT", command=lambda: self.change_to_user_functionality(main_frame))
