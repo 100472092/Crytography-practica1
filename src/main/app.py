@@ -12,7 +12,7 @@ ERR_MSG_SIZE = constantes.ERR_MSG_SIZE
 
 
 class App:
-    curr_user = user.User("pepe")
+    curr_user = None
     password_tries = constantes.PASSWORD_TRIES
     allow_mod = False
 
@@ -31,8 +31,8 @@ class App:
         self.error_stream.pack(side=BOTTOM, pady=0)
 
         # Primera escena
-        # self.log_in_scene(self.main_frame)
-        self.functionality_scene(self.main_frame)
+        self.log_in_scene(self.main_frame)
+
         # bucle principal
         self.root.mainloop()
 
