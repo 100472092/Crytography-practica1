@@ -3,15 +3,16 @@ from data_base_gestor import DataBase
 
 
 class MyDict:
-    def __init__(self, data):
+    def __init__(self, data, tipo):
         self.data: dict = data
+        self.tipo = tipo
 
     def __str__(self):
         out = ""
         for i in self.data:
             exams_i = self.data[i]
             if len(exams_i) < 1:
-                exams_i = "sin examenes registrados..."
+                exams_i = "sin " + self.tipo + " registrados..."
             out += i + ": " + str(exams_i) + "\n"
         return out
 
@@ -43,7 +44,7 @@ class User():
         dict_out = dict()
         for i in db.subjects_from_user(self.user_name):
             dict_out[i] = db.exams_from_subject(self.user_name, i)
-        return MyDict(dict_out)
+        return MyDict(dict_out, "exámenes")
 
     @property
     def projects(self):
@@ -51,7 +52,7 @@ class User():
         dict_out = dict()
         for i in db.subjects_from_user(self.user_name):
             dict_out[i] = db.projects_from_subject(self.user_name, i)
-        return MyDict(dict_out)
+        return MyDict(dict_out, "proyectos")
 
     @property
     def subjects(self):
@@ -148,8 +149,6 @@ class User():
     def add_exam(self, subject: str, date: str, nota: int = -1):
         db = DataBase()
         exams_lists = db.exams_from_subject(self.user_name, subject)
-        # TODO: REGEX TO VALIDATE DATE
-
         if date in exams_lists:
             print("Ese examen ya está registrado!!")
             return False
@@ -207,25 +206,15 @@ class User():
                 case _:
                     print("Acción no valida")
 
-    def add_project(self, subject):
+    def add_project(self, subject, fecha, mark):
         db = DataBase()
-
         project_list = db.projects_from_subject(self.user_name, subject)
-        print(project_list)
-        fecha = input("Añada la fecha de entrega del proyecto [dd-mm-yyyy]")  # TODO: REGEX TO VALIDATE DATE
-
         if fecha in project_list:
             print("Ese proyecto ya está registrado!!")
+            return False
         else:
-            add_mark = input("Quieres añadir nota al proyecto?[Y/N]")
-            mark = -1
-            if add_mark == "Y":
-                try:
-                    mark = int(input("Nota del proyecto: "))
-                except:
-                    mark = -1
-                    print("Nota no válida, no se asignará nota")
             db.register_new_event(self.user_name, subject, fecha, "PROJECT", mark)
+            return True
 
     def modify_project(self, subject: str):
         db = DataBase()
@@ -242,6 +231,15 @@ class User():
         new_date = input("nueva fecha")
         db.delete_event(self.user_name, subject, old_date, 'PROJECT')
         db.register_new_event(self.user_name, subject, new_date,'PROJECT', -1)
+
+    def drop_project(self, subject: str, date):
+        db = DataBase()
+        project_list = db.projects_from_subject(self.user_name, subject)
+        if date not in project_list:
+            return False
+        print("projecto eliminado")
+        db.delete_event(self.user_name, subject, date, 'PROJECT')
+        return True
 
     def str_subjects(self):
         out = ""

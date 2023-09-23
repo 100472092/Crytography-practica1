@@ -13,13 +13,13 @@ ERR_MSG_SIZE = constantes.ERR_MSG_SIZE
 
 class App:
     curr_user = user.User("pepe")
-    password_tries = 3
+    password_tries = constantes.PASSWORD_TRIES
     allow_mod = False
 
     def __init__(self):
         self.root = Tk()
-        self.root.geometry("900x600")
-        self.root.title("AGENDA")
+        self.root.geometry(constantes.WINDOW_DIMENSSIONS)
+        self.root.title(constantes.WINDOW_TITTLE)
         self.root.resizable(width=False, height=False)
 
         # Marco principal, se pasa como argumento a todoas las escenas
@@ -32,11 +32,30 @@ class App:
 
         # Primera escena
         # self.log_in_scene(self.main_frame)
-        self.add_subject_scene(self.main_frame)
+        self.functionality_scene(self.main_frame)
         # bucle principal
         self.root.mainloop()
 
     # == VALIDATE DATA ==
+    @staticmethod
+    def validate_date(date):
+        if not re.match(r"^(2[0-9]{3})(-)(1[0-2]|0[1-9])(-)(3[01]|[12][0-9]|0[1-9])$", date):
+            err_msg = "Fecha no válida"
+            return False, err_msg
+        return True, ""
+
+    @staticmethod
+    def validate_mark(mark):
+        try:
+            if mark == "":
+                return True, ""
+            mark = int(mark)
+            if mark < 0:
+                return False, "La nota debe ser mayor o igual que 0"
+        except ValueError:
+            return False, "La nota debe ser un número entero"
+        return True, ""
+
     def validate_subject(self, subject, ev_existence=False):
         if len(subject) <= 0:
             return False, "campo de asignatura vacío"
@@ -45,13 +64,6 @@ class App:
                 return False, "asignatura no existente"
         if len(subject) > 15:
             return False, "nombre de asignatura demasiado largo"
-        return True, ""
-
-    @staticmethod
-    def validate_date(date):
-        if not re.match(r"^(2[0-9]{3})(-)(1[0-2]|0[1-9])(-)(3[01]|[12][0-9]|0[1-9])$", date):
-            err_msg = "Fecha no válida"
-            return False, err_msg
         return True, ""
 
     def validate_date_existence(self, date, subject, tipo):
@@ -71,17 +83,6 @@ class App:
         else:
             print("Fatal error: mal llamado a la función")
             return None
-        return True, ""
-
-    def validate_mark(self, mark):
-        try:
-            if mark == "":
-                return True, ""
-            mark = int(mark)
-            if mark < 0:
-                return False, "La nota debe ser mayor o igual que 0"
-        except:
-            return False, "La nota debe ser un número entero"
         return True, ""
 
     # == FUNCIONALIDAD ==
@@ -172,6 +173,7 @@ class App:
             if not self.curr_user.drop_exam(subject, date):
                 # si saltan estos print quiere decir que hubo un error en comprobaciones anteriores
                 print("Fatal error: fecha que no existe")
+                return
             channel.config(text="Examen eliminado", fg='green')
             exams.config(text=self.curr_user.exams)
 
@@ -195,6 +197,66 @@ class App:
             return
         self.curr_user.drop_subject(subject)
         subjects_frame.config(text=self.curr_user.str_subjects())
+
+    def app_add_project(self, subject, date, mark, channel, projects):
+        valid_s, err_msg = self.validate_subject(subject, True)
+        if not valid_s:
+            channel.config(text=err_msg, fg="red")
+            return
+        valid_s, err_msg = self.validate_date(date)
+        if not valid_s:
+            channel.config(text=err_msg, fg="red")
+            return
+        valid_s, err_msg = self.validate_mark(mark)
+        if not valid_s:
+            channel.config(text=err_msg, fg='red')
+            return
+        if mark == "":
+            mark = -1
+        if self.curr_user.add_project(subject, date, mark):
+            channel.config(text="Proyecto añadido", fg='green')
+        else:
+            channel.config(text="Proyecto ya registrado", fg="red")
+        projects.config(text=self.curr_user.projects)
+
+    def app_modify_project(self, old_subject, old_date, new_subject, new_date, mark, channel, projects):
+        channel.config(text="")
+        if self.allow_mod:
+            valid_s, err_msg = self.validate_subject(new_subject, False)
+            if not valid_s:
+                channel.config(text=err_msg, fg="red")
+                return
+            valid_s, err_msg = self.validate_date(new_date)
+            if not valid_s:
+                channel.config(text=err_msg, fg="red")
+                return
+            valid_s, err_msg = self.validate_mark(mark)
+            if not valid_s:
+                channel.config(text=err_msg, fg='red')
+                return
+            if mark == "":
+                mark = -1
+            if not self.curr_user.modify_exam(old_subject, old_date, new_subject, new_date, mark):
+                print("FATAL ERROR: FALLO EN LA MODIFICACIÓN EN LA BASE DE DATOS")
+                return
+            projects.config(text=self.curr_user.projects.__str__())
+            channel.config(text='Proyecto modificado', fg='green')
+        else:
+            channel.config(text="Selecciona primero un proyecto", fg='red')
+
+    def app_delete_project(self, subject, date, channel, projects):
+        channel.config(text="")
+        valid, err_msg = self.validate_date_existence(date, subject, 'PROJECT')
+        if not valid:
+            channel.config(text=err_msg, fg='red')
+            return
+        if date in self.curr_user.projects.data[subject]:
+            if not self.curr_user.drop_project(subject, date):
+                # si saltan estos print quiere decir que hubo un error en comprobaciones anteriores
+                print("Fatal error: fecha que no existe")
+                return
+            channel.config(text="Projecto eliminado", fg='green')
+            projects.config(text=self.curr_user.projects.__str__())
 
     # == TRANSICIONES ==
     def change_to_log_in(self, frame):
@@ -245,6 +307,26 @@ class App:
         self.error_stream_restore()
         frame.destroy()
         self.delete_subject_scene(self.main_frame)
+
+    def change_to_project_scene(self, frame):
+        self.error_stream_restore()
+        frame.destroy()
+        self.project_scene(self.main_frame)
+
+    def change_to_add_project(self, frame):
+        self.error_stream_restore()
+        frame.destroy()
+        self.add_project_scene(self.main_frame)
+
+    def change_to_modify_project_scene(self, frame):
+        self.error_stream_restore()
+        frame.destroy()
+        self.modify_project_scene(self.main_frame)
+
+    def change_to_delete_project_scene(self, frame):
+        self.error_stream_restore()
+        frame.destroy()
+        self.delete_project_scene(self.main_frame)
 
     # == ESCENAS ==
     def log_in_scene(self, root):
@@ -391,7 +473,7 @@ class App:
         body_frame = Frame(main_frame, borderwidth=constantes.FRAME_BORDERWIDTH, relief="groove")
         body_frame.grid(row=1, column=0)
 
-        exams_frame = Frame(main_frame, borderwidth=3, relief="groove")
+        exams_frame = Frame(main_frame, borderwidth=constantes.FRAME_BORDERWIDTH, relief="groove")
         sub_title = Label(exams_frame, text="Tus exámenes:\t\t", justify=LEFT, font=(SUBTITLE_SIZE, SUBTITLE_SIZE))
         exams = Label(exams_frame, text=self.curr_user.exams.__str__(), justify=LEFT)
 
@@ -404,9 +486,9 @@ class App:
         select_date_label = Label(select_frame, text="Fecha")
         select_label = Label(select_frame, text="Seleccion:")
         apply_button = Button(select_frame, text="Aplicar selección",
-                              command=lambda: self.apply_selection(select_subj.get(), select_date.get(),
-                                                                   err_communication, old_subj_box, old_date_box,
-                                                                   old_mark_box))
+                              command=lambda: self.apply_selection_exam(select_subj.get(), select_date.get(),
+                                                                        err_communication, old_subj_box, old_date_box,
+                                                                        old_mark_box))
 
         select_label.grid(row=1, column=0)
         select_subj_label.grid(row=0, column=1)
@@ -439,10 +521,9 @@ class App:
         new_mark_box.grid(row=3, column=2)
 
         save_button = Button(change_frame, text="Guardar",
-                             command=lambda: self.app_modify_exam(old_subj_box.get(), old_date_box.get(),
-                                                                  new_subj_box.get(),
-                                                                  new_date_box.get(), new_mark_box.get(),
-                                                                  err_communication, exams))
+                             command=lambda: self.app_modify_project(old_subj_box.get(), old_date_box.get(),
+                                                                     new_subj_box.get(), new_date_box.get(),
+                                                                     new_mark_box.get(), err_communication, exams))
         save_button.grid(row=4, column=0, columnspan=3, pady=10)
 
         quit_button = Button(body_frame, text="QUIT", command=lambda: self.change_to_user_functionality(main_frame))
@@ -459,7 +540,7 @@ class App:
         tittle.grid(row=0, column=0, columnspan=2)
         err_comunication = Label(main_frame, text="", font=(constantes.SUBTITLE_FONT, ERR_MSG_SIZE), pady=10)
 
-        exams_frame = Frame(main_frame, borderwidth=3, relief="groove")
+        exams_frame = Frame(main_frame, borderwidth=constantes.FRAME_BORDERWIDTH, relief="groove")
         sub_title = Label(exams_frame, text="Tus exámenes:\t\t", justify=LEFT, font=(SUBTITLE_SIZE, SUBTITLE_SIZE))
         exams = Label(exams_frame, text=self.curr_user.exams.__str__(), justify=LEFT)
 
@@ -578,12 +659,183 @@ class App:
         sub_title.pack()
         subjects.pack()
         warning_label = Label(main_frame,
-            text="Si eliminas una asignatura, se borrarán todos los examenes y proyectos asociados a ella",
+                              text="Si eliminas una asignatura, se borrarán todos los examenes"
+                                   " y proyectos asociados a ella",
                               font=(constantes.ERR_FONT, constantes.WARNING_SIZE), fg='black')
         warning_label.grid(row=3, column=0, columnspan=2)
 
+    def project_scene(self, root):
+        main_frame = ttk.Frame(root)
+        main_frame.pack()
+        tittle = Label(main_frame, text="Gestión de projectos", font=(constantes.TITTLE_FONT, TITTLE_SIZE))
+        tittle.pack(pady=10, fill="x")
+        sub_frame = ttk.Frame(main_frame, borderwidth=constantes.FRAME_BORDERWIDTH, relief="groove")
+        sub_frame.pack()
+        sub_title = Label(sub_frame, text="Tus proyectos:\t\t", justify=LEFT,
+                          font=(constantes.SUBTITLE_FONT, SUBTITLE_SIZE))
+        sub_title.pack()
+        project_dict = self.curr_user.projects
+        projects = Label(sub_frame, text=project_dict.__str__(), justify=LEFT)
+        projects.pack()
+        actions_frame = ttk.Frame(main_frame)
+        actions_frame.pack()
+        add_button = Button(actions_frame, text="ADD", command=lambda: self.change_to_add_project(main_frame))
+        add_button.grid(row=0, column=0)
+        mod_button = Button(actions_frame, text="MODIFY",
+                            command=lambda: self.change_to_modify_project_scene(main_frame))
+        mod_button.grid(row=0, column=1)
+        del_button = Button(actions_frame, text="DELETE",
+                            command=lambda: self.change_to_delete_project_scene(main_frame))
+        del_button.grid(row=0, column=2)
+        quit_button = Button(main_frame, text="Back", command=lambda: self.change_to_user_functionality(main_frame))
+        quit_button.pack()
+
+    def add_project_scene(self, root):
+        main_frame = Frame(root)
+        main_frame.pack()
+        tittle = Label(main_frame, text="Añadir Poryectos", font=(constantes.TITTLE_FONT, TITTLE_SIZE))
+        tittle.grid(row=0, column=0, columnspan=2)
+        err_communication = Label(main_frame, text="", font=(constantes.SUBTITLE_FONT, ERR_MSG_SIZE), pady=10)
+
+        projects_frame = Frame(main_frame, borderwidth=3, relief="groove")
+        sub_title = Label(projects_frame, text="Tus proyectos:\t\t", justify=LEFT, font=(SUBTITLE_SIZE, SUBTITLE_SIZE))
+        projects = Label(projects_frame, text=self.curr_user.projects.__str__(), justify=LEFT)
+
+        sub_frame = Frame(main_frame, borderwidth=constantes.FRAME_BORDERWIDTH, relief="groove", padx=5, pady=5)
+        sub_frame.grid(row=1, column=0, ipady=23)
+        subj_label = Label(sub_frame, text="Asignatura*")
+        date_label = Label(sub_frame, text="Fecha*")
+        mark_label = Label(sub_frame, text="Nota")
+        subj_label.grid(row=0, column=0)
+        date_label.grid(row=1, column=0)
+        mark_label.grid(row=2, column=0)
+        subj_box = Entry(sub_frame)
+        date_box = Entry(sub_frame)
+        mark_box = Entry(sub_frame)
+        subj_box.grid(row=0, column=1)
+        date_box.grid(row=1, column=1)
+        mark_box.grid(row=2, column=1)
+        buttons_frame = Frame(sub_frame)
+        buttons_frame.grid(row=3, column=0, columnspan=2)
+        confirm_button = Button(buttons_frame, text="ADD",
+                                command=lambda: self.app_add_project(subj_box.get(), date_box.get(), mark_box.get(),
+                                                                     err_communication, projects))
+        quit_button = Button(buttons_frame, text="QUIT", command=lambda: self.change_to_user_functionality(main_frame))
+        confirm_button.pack(side="left", pady=5)
+        quit_button.pack(side="right", pady=5)
+
+        err_communication.grid(row=2, column=0, columnspan=2)
+        projects_frame.grid(row=1, column=1)
+        sub_title.pack()
+        projects.pack()
+
+    def modify_project_scene(self, root):
+        main_frame = Frame(root)
+        main_frame.pack()
+        tittle = Label(main_frame, text="Modificar Proyectos", font=(constantes.TITTLE_FONT, TITTLE_SIZE))
+        tittle.grid(row=0, column=0, columnspan=2, ipady=10)
+        body_frame = Frame(main_frame, borderwidth=constantes.FRAME_BORDERWIDTH, relief="groove")
+        body_frame.grid(row=1, column=0)
+
+        projects_frame = Frame(main_frame, borderwidth=constantes.FRAME_BORDERWIDTH, relief="groove")
+        sub_title = Label(projects_frame, text="Tus proyectos:\t\t", justify=LEFT, font=(SUBTITLE_SIZE, SUBTITLE_SIZE))
+        projects = Label(projects_frame, text=self.curr_user.projects.__str__(), justify=LEFT)
+
+        select_frame = Frame(body_frame, borderwidth=constantes.FRAME_BORDERWIDTH, relief="groove")
+        select_frame.pack(ipady=5)
+        err_communication = Label(select_frame, text="", font=(constantes.ERR_FONT, ERR_MSG_SIZE), pady=5)
+        select_subj = Entry(select_frame)
+        select_date = Entry(select_frame)
+        select_subj_label = Label(select_frame, text="Asignatura")
+        select_date_label = Label(select_frame, text="Fecha")
+        select_label = Label(select_frame, text="Seleccion:")
+        apply_button = Button(select_frame, text="Aplicar selección",
+                              command=lambda: self.apply_selection_project(select_subj.get(), select_date.get(),
+                                                                           err_communication, old_subj_box,
+                                                                           old_date_box,
+                                                                           old_mark_box))
+
+        select_label.grid(row=1, column=0)
+        select_subj_label.grid(row=0, column=1)
+        select_date_label.grid(row=0, column=2)
+        select_subj.grid(row=1, column=1)
+        select_date.grid(row=1, column=2)
+        apply_button.grid(row=2, column=0, columnspan=3, pady=5)
+        err_communication.grid(row=3, column=0, columnspan=3)
+
+        change_frame = Frame(body_frame)
+        change_frame.pack()
+        old_label = Label(change_frame, text="ANTIGUO")
+        new_label = Label(change_frame, text="NUEVO")
+        old_subj_box = Entry(change_frame, state=DISABLED)
+        old_date_box = Entry(change_frame, state=DISABLED)
+        old_mark_box = Entry(change_frame, state=DISABLED)
+        new_subj_box = Entry(change_frame)
+        new_date_box = Entry(change_frame)
+        new_mark_box = Entry(change_frame)
+        old_label.grid(row=0, column=0)
+        new_label.grid(row=0, column=2)
+        Label(change_frame, text="Asignatura").grid(row=1, column=1)
+        Label(change_frame, text="Fecha").grid(row=2, column=1)
+        Label(change_frame, text="Nota").grid(row=3, column=1)
+        old_subj_box.grid(row=1, column=0)
+        old_date_box.grid(row=2, column=0)
+        old_mark_box.grid(row=3, column=0)
+        new_subj_box.grid(row=1, column=2)
+        new_date_box.grid(row=2, column=2)
+        new_mark_box.grid(row=3, column=2)
+
+        save_button = Button(change_frame, text="Guardar",
+                             command=lambda: self.app_modify_project(old_subj_box.get(), old_date_box.get(),
+                                                                     new_subj_box.get(),
+                                                                     new_date_box.get(), new_mark_box.get(),
+                                                                     err_communication, projects))
+        save_button.grid(row=4, column=0, columnspan=3, pady=10)
+
+        quit_button = Button(body_frame, text="QUIT", command=lambda: self.change_to_user_functionality(main_frame))
+        quit_button.pack(pady=20)
+
+        projects_frame.grid(padx=5, ipady=97, row=1, column=1)
+        sub_title.pack()
+        projects.pack()
+
+    def delete_project_scene(self, root):
+        main_frame = Frame(root)
+        main_frame.pack()
+        tittle = Label(main_frame, text="Eliminar Proyectos", font=(constantes.TITTLE_FONT, TITTLE_SIZE))
+        tittle.grid(row=0, column=0, columnspan=2)
+        err_communication = Label(main_frame, text="", font=(constantes.SUBTITLE_FONT, ERR_MSG_SIZE), pady=10)
+
+        projects_frame = Frame(main_frame, borderwidth=constantes.FRAME_BORDERWIDTH, relief="groove")
+        sub_title = Label(projects_frame, text="Tus proyectos:\t\t", justify=LEFT, font=(SUBTITLE_SIZE, SUBTITLE_SIZE))
+        projects = Label(projects_frame, text=self.curr_user.projects.__str__(), justify=LEFT)
+
+        sub_frame = Frame(main_frame, borderwidth=constantes.FRAME_BORDERWIDTH, relief="groove", padx=5, pady=5)
+        sub_frame.grid(row=1, column=0, ipady=23)
+        subj_label = Label(sub_frame, text="Asignatura*")
+        date_label = Label(sub_frame, text="Fecha*")
+        subj_label.grid(row=0, column=0)
+        date_label.grid(row=1, column=0)
+        subj_box = Entry(sub_frame)
+        date_box = Entry(sub_frame)
+        subj_box.grid(row=0, column=1)
+        date_box.grid(row=1, column=1)
+        buttons_frame = Frame(sub_frame)
+        buttons_frame.grid(row=3, column=0, columnspan=2)
+        confirm_button = Button(buttons_frame, text="DELETE",
+                                command=lambda: self.app_delete_project(subj_box.get(), date_box.get(),
+                                                                        err_communication, projects))
+        quit_button = Button(buttons_frame, text="QUIT", command=lambda: self.change_to_user_functionality(main_frame))
+        confirm_button.pack(side="left", pady=5)
+        quit_button.pack(side="right", pady=5)
+
+        err_communication.grid(row=2, column=0, columnspan=2)
+        projects_frame.grid(row=1, column=1)
+        sub_title.pack()
+        projects.pack()
+
     # == FUNCIONES AUXILIARES PARA BOTONES ==
-    def apply_selection(self, subject, date, channel, old_subject_box, old_date_box, old_mark_box):
+    def apply_selection_exam(self, subject, date, channel, old_subject_box, old_date_box, old_mark_box):
         valid_s, err_msg = self.validate_date_existence(date, subject, 'EXAM')
         if not valid_s:
             channel.config(text=err_msg)
@@ -600,6 +852,27 @@ class App:
         old_subject_box.insert(0, subject)
         old_date_box.insert(0, date)
         old_mark_box.insert(0, self.curr_user.check_event_mark(subject, date, 'EXAM'))
+        old_subject_box.config(state=DISABLED)
+        old_date_box.config(state=DISABLED)
+        old_mark_box.config(state=DISABLED)
+
+    def apply_selection_project(self, subject, date, channel, old_subject_box, old_date_box, old_mark_box):
+        valid_s, err_msg = self.validate_date_existence(date, subject, 'PROJECT')
+        if not valid_s:
+            channel.config(text=err_msg)
+            return
+
+        self.allow_mod = True
+        channel.config(text="aplicando selección", fg="green")
+        old_subject_box.config(state='normal')
+        old_date_box.config(state='normal')
+        old_mark_box.config(state='normal')
+        old_subject_box.delete(0, END)
+        old_date_box.delete(0, END)
+        old_mark_box.delete(0, END)
+        old_subject_box.insert(0, subject)
+        old_date_box.insert(0, date)
+        old_mark_box.insert(0, self.curr_user.check_event_mark(subject, date, 'PROJECT'))
         old_subject_box.config(state=DISABLED)
         old_date_box.config(state=DISABLED)
         old_mark_box.config(state=DISABLED)
