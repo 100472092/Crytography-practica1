@@ -188,6 +188,8 @@ class App:
             return
         if not self.curr_user.add_subject(subject):
             print("Fatal error: la asignatura ya existe")
+        else:
+            channel.config(text="Asignatura añadida con éxito", fg='green')
         subjects.config(text=self.curr_user.str_subjects())
 
     def app_delete_subject(self, subject, channel, subjects_frame):
@@ -195,7 +197,10 @@ class App:
         if not valid:
             channel.config(text=err_msg, fg='red')
             return
-        self.curr_user.drop_subject(subject)
+        if not self.curr_user.drop_subject(subject):
+            print("FATAL ERROR: fallo al borrar la asignatura")
+        else:
+            channel.config(text="Asignatura eliminada con éxito", fg='green')
         subjects_frame.config(text=self.curr_user.str_subjects())
 
     def app_add_project(self, subject, date, mark, channel, projects):

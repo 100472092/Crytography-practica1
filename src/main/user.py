@@ -116,8 +116,10 @@ class User():
         subjects_list = db.subjects_from_user(self.user_name)
         if not subject.lower() in subjects_list:
             print("DROP_SUBJECT: ASIGNATURA NO EXISTE!!")
+            return False
         print("DROP_SUBJECT: ASIGNATURA ELIMINADA")
         db.delete_subject_from_user(self.user_name, subject)
+        return True
 
     def manage_exams(self):
         db = DataBase()
