@@ -37,7 +37,7 @@ def login_user(user_name: str, pw: str):
     return None
 
 
-class User():
+class User:
     def __init__(self, user_name):
         self.user_name = user_name
 
@@ -63,43 +63,6 @@ class User():
         out = db.subjects_from_user(self.user_name)
         return out
 
-    def functionality(self):
-        user_choice = input(
-            " 1: GESTIONAR ASIGNATURAS. \n 2: GESTIONAR EXAMENES. \n 3: GESTIONAR PROYECTOS. \n 4: EXIT \n")
-        match user_choice:
-            case "1":
-                self.manage_subject()
-                return 1
-            case "2":
-                self.manage_exams()
-                return 1
-            case "3":
-                self.manage_projects()
-                return 1
-            case "4":
-                return 0
-            case _:
-                print("Error: Acción no válidad")
-
-    def manage_subject(self):
-        exit_v = False
-        while not exit_v:
-            user_choice = input(" 1: AÑADIR ASIGNATURA.\n 2: ELIMINAR ASIGNATURA\n 3: EXIT")
-            match user_choice:
-                case "1":
-                    self.add_subject()
-                    return
-                case "2":
-                    print("Si borras una asignatura se borrarán todos los exámenes/proyectos asociados a ella")
-                    sure = input("Quieres continuar?[Y/N]: ")
-                    if sure == "Y":
-                        self.drop_subject()
-                    return
-                case "3":
-                    exit_v = True
-                case _:
-                    print("Acción no validad")
-
     def add_subject(self, new_subject):
         db = DataBase()
         new_subject = new_subject.lower()
@@ -120,35 +83,6 @@ class User():
         print("DROP_SUBJECT: ASIGNATURA ELIMINADA")
         db.delete_subject_from_user(self.user_name, subject)
         return True
-
-    def manage_exams(self):
-        db = DataBase()
-        subjects_list = db.subjects_from_user(self.user_name)
-        print("Asignaturas disponibles:", subjects_list)
-        subject = input("Elije asignatura:")
-        while subject not in subjects_list and subject != "0":
-            subject = input("No existe la asignatura, elige una asignatura válida. Exit:0 \n")
-        if subject == "0":
-            return
-
-        print("TUS EXAMENES:", db.exams_from_subject(self.user_name, subject))
-        exit_v = False
-        while not exit_v:
-            user_choice = input(" 1: AÑADIR EXAMEN.\n 2: MODIFICAR FECHA DE EXAMEN\n 3: ELIMINAR EXAMEN\n 4: EXIT\n")
-            match user_choice:
-                case "1":
-                    self.add_exam(subject)
-                    return
-                case "2":
-                    self.modify_exam(subject)
-                    return
-                case "3":
-                    self.drop_exam(subject)
-                    return
-                case "4":
-                    exit_v = True
-                case _:
-                    print("Acción no valida")
 
     # TODO: generalizar selección de asignatura y examen
 
@@ -192,35 +126,6 @@ class User():
         db.delete_event(self.user_name, subject, date, 'EXAM')
         return True
 
-    def manage_projects(self):
-        db = DataBase()
-        subjects_list = db.subjects_from_user(self.user_name)
-        print("Asignaturas disponibles:", subjects_list)
-        subject = input("Elije asignatura:")
-        while subject not in subjects_list and subject != "0":
-            subject = input("No existe la asignatura, elige una asignatura válida. Exit:0 \n")
-        if subject == "0":
-            return
-        print("TUS PROYECTOS:", db.projects_from_subject(self.user_name, subject))
-        exit_v = False
-        while not exit_v:
-            user_choice = input(
-                " 1: AÑADIR PROYECTO.\n 2: MODIFICAR FECHA DE ENTREGA\n 3: ELIMINAR PROYECTO\n 4: EXIT\n")
-            match user_choice:
-                case "1":
-                    self.add_project(subject)
-                    return
-                case "2":
-                    self.modify_project(subject)
-                    return
-                case "3":
-                    self.drop_project(subject)
-                    return
-                case "4":
-                    exit_v = True
-                case _:
-                    print("Acción no valida")
-
     def add_project(self, subject, fecha, mark):
         db = DataBase()
         project_list = db.projects_from_subject(self.user_name, subject)
@@ -251,7 +156,8 @@ class User():
     def str_subjects(self):
         out = ""
         for s in self.subjects:
-            out += s + ": " + str(len(self.exams.data[s])) + " examene(s)\n"
+            out += s + ": " + str(len(self.exams.data[s])) + " examene(s) y " + str(
+                len(self.projects.data[s])) + " proyecto(s)\n"
         return out
 
 
