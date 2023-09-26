@@ -941,7 +941,7 @@ class App:
         for e in self.curr_user.exams.data[subject]:
             mark = self.curr_user.check_event_mark(subject, e, 'EXAM')
             if mark == -1:
-                mark = "-"
+                mark = "sin nota..."
             list_box_exams.insert(END, e + " = " + str(mark))
 
         for e in self.curr_user.projects.data[subject]:
