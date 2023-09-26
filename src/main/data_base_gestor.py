@@ -4,6 +4,7 @@ import sql_scripts
 
 PATH = os.path.dirname(__file__)[:-4] + "storage/database.db"
 
+
 class DataBase:
     """Interfaz con la base de datos. Sólo instanciable una vez"""
 
@@ -23,7 +24,7 @@ class DataBase:
     class __DataBase:
         def __init__(self):
             self.path: str = PATH
-            self.base: DataBase = None
+            self.base = None
 
         def open(self):
             self.base = sl.connect(PATH)
@@ -49,7 +50,6 @@ class DataBase:
             self.open()
             print("Inicializando base de datos...")
             # inicializar
-            # TODO: mover el scrip de sql a otro archivo e importarlo
             self.base.executescript(
                 sql_scripts.CREATE_TABLES
             )
@@ -59,7 +59,7 @@ class DataBase:
             """busca en las credenciales un usuario y, si existe, devuelve el nombre"""
             self.open()
             sql = "SELECT USER_NAME FROM USER_CREDS WHERE USER_NAME=?"
-            data = self.base.execute(sql, (user, ))
+            data = self.base.execute(sql, (user,))
             data = data.fetchall()
             self.close()
             if len(data) >= 1:
@@ -71,12 +71,12 @@ class DataBase:
             """Busca un password token en las credenciales y, si coincide con uno dado, devuelve true"""
             self.open()
             sql = "SELECT PASSWORD FROM USER_CREDS WHERE PASSWORD=?"
-            data = self.base.execute(sql, (password_tk, ))
+            data = self.base.execute(sql, (password_tk,))
             data = data.fetchall()
             self.close()
             if len(data) >= 1:
                 # print("found")
-                return True # no devolvemos el pw_token por seguridad
+                return True  # no devolvemos el pw_token por seguridad
             return False
 
         def search_subject(self, user: str, subject: str):
@@ -105,7 +105,7 @@ class DataBase:
             self.base.commit()
             self.close()
 
-        def register_new_subject(self, user: str, new_subject:str):
+        def register_new_subject(self, user: str, new_subject: str):
             """annade una nueva asignatura para un usuario en la base de datos"""
             self.open()
             sql = "INSERT INTO USER_SUBJ (USER_NAME, SUBJECT) VALUES(?, ?)"
@@ -136,7 +136,8 @@ class DataBase:
             self.base.execute(sql, (user_name, subject, date, tipo))
             self.base.commit()
             self.close()
-        def exams_from_subject(self, user:str, subject: str):
+
+        def exams_from_subject(self, user: str, subject: str):
             """extrae una lista de todos los examens de un usuario dada una asignatura"""
             self.open()
             sql = "SELECT FECHA FROM USER_EVENT WHERE USER_NAME=? AND SUBJECT=? AND TIPO='EXAM'"
@@ -156,11 +157,11 @@ class DataBase:
                 out.append(item[0])
             return out
 
-        def subjects_from_user(self, user:str):
+        def subjects_from_user(self, user: str):
             """extrae una lista de todas las asignaturas de un usuario"""
             self.open()
             sql = "SELECT SUBJECT FROM USER_SUBJ WHERE USER_NAME=?"
-            data = self.base.execute(sql, (user, )).fetchall()
+            data = self.base.execute(sql, (user,)).fetchall()
             out = []
             for i in range(len(data)):
                 out.append(data[i][0])
@@ -187,17 +188,18 @@ class DataBase:
             ]
             self.base.executemany("INSERT INTO USER_SUBJ (USER_NAME, SUBJECT) VALUES(?, ?)", data)
             data = [
-                ("pepe", "matematicas", "2012-12-12", "EXAM", 9),
-                ("pepe", "lengua", "2013-12-12", "EXAM", 9),
-                ("pepe", "ingles", "2012-12-12", "EXAM", 9),
-                ("pepe", "naturales", "2012-12-12", "EXAM", 9),
-                ("pepe", "sociales", "2012-12-12", "EXAM", 9),
+                ("pepe", "matematicas", "2012-01-01", "EXAM", 9),
+                ("pepe", "lengua", "2013-12-12", "EXAM", 8),
+                ("pepe", "ingles", "2014-12-12", "EXAM", 7),
+                ("pepe", "naturales", "2015-12-12", "EXAM", 6),
+                ("pepe", "sociales", "2016-12-12", "EXAM", 5),
 
                 ("pepe", "matematicas", "2012-12-12", "PROJECT", 7),
                 ("pepe", "lengua", "2012-12-12", "PROJECT", 6),
 
             ]
-            self.base.executemany("INSERT INTO USER_EVENT (USER_NAME, SUBJECT, FECHA, TIPO, NOTA) VALUES(?, ?, ?, ?, ?)", data)
+            self.base.executemany(
+                "INSERT INTO USER_EVENT (USER_NAME, SUBJECT, FECHA, TIPO, NOTA) VALUES(?, ?, ?, ?, ?)", data)
             self.base.commit()
             self.close()
 
@@ -227,11 +229,12 @@ class DataBase:
             self.print_subj()
             self.print_events()
 
+
 if __name__ == "__main__":
     print(PATH)
     db = DataBase()
     db.restore()
-    #db.initialize()
+    # db.initialize()
     control = input("wanna insert test data?[Y/N]: ")
     if control == "Y":
         db.insert_test_case()

@@ -5,9 +5,9 @@ from app import App
 
 def main():
     # Sino existe, inicializa la base de datos
-    if not os.path.exists(os.path.dirname(__file__)[:-4] + "storage"):
+    if not os.path.exists(os.path.dirname(__file__)[:-4] + "storage/database.db"):
         print("Creando base de datos...")
-        os.makedirs(os.path.dirname(__file__)[:-4] + "storage", mode=0o777, exist_ok=False)
+        os.makedirs(os.path.dirname(__file__)[:-4] + "storage", mode=0o777, exist_ok=True)
         DataBase().initialize()
 
     # funcionalidad de la interfaz gráfica

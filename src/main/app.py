@@ -90,24 +90,27 @@ class App:
         self.error_stream.config(text="")
 
     def app_login_user(self, user_name, password, label, frame):
-        label.config(text="")
-        if self.password_tries > 0:
+        self.curr_user = user.login_user(user_name, password)
+        if not self.curr_user:
             self.password_tries -= 1
-            if self.password_tries == 0:
-                print("warning_message: fallos por numero de intentos")
-                self.error_stream.config(text="Si fallas una vez más\nla aplicación se bloqueará 5 segundos")
+            label.config(text="Bad log in")
         else:
+            self.password_tries = 3
+            self.change_to_user_functionality(frame)
+            return
+        print(self.password_tries)
+        label.config(text="")
+        if self.password_tries == 1:
+            print("warning_message: fallos por numero de intentos")
+            self.error_stream.config(text="Si fallas una vez más\nla aplicación se bloqueará 5 segundos")
+        if self.password_tries == 0:
             print("Aplicación bloqueada: demasiados intentos")
             frame.destroy()
             time.sleep(5)
-            self.log_in_scene(self.main_frame)
             self.password_tries = 3
+            self.log_in_scene(self.main_frame)
             return
-        self.curr_user = user.login_user(user_name, password)
-        if not self.curr_user:
-            label.config(text="Bad log in")
-            return
-        self.change_to_user_functionality(frame)
+
 
     def app_register_user(self, user_name, password, frame, root, bad_label):
         bad_label.config(text="")
@@ -335,6 +338,11 @@ class App:
         frame.destroy()
         self.delete_project_scene(self.main_frame)
 
+    def change_to_mark_scene(self, frame):
+        self.error_stream_restore()
+        frame.destroy()
+        self.marks_scene(self.main_frame)
+
     # == ESCENAS ==
     def log_in_scene(self, root):
         self.error_stream.config(text="")
@@ -398,16 +406,18 @@ class App:
         sub_frame = Frame(main_frame, borderwidth=3, relief="groove")
         sub_frame.grid(row=1, column=0)
         sub_title = Label(sub_frame, text="Qué quiere consultar?", font=(constantes.SUBTITLE_FONT, SUBTITLE_SIZE))
-        sub_title.grid(row=0, column=0, columnspan=3, pady=10)
+        sub_title.grid(row=0, column=0, columnspan=4)
         subj_button = Button(sub_frame, text="Asignaturas", command=lambda: self.change_to_subject_scene(main_frame))
         subj_button.grid(row=1, column=0)
         exams_button = Button(sub_frame, text="Exams", command=lambda: self.change_to_exam_scene(main_frame))
-        exams_button.grid(row=1, column=1, ipadx=20)
-        project_button = Button(sub_frame, text="Projects", padx=15,
+        exams_button.grid(row=1, column=1)
+        project_button = Button(sub_frame, text="Projects",
                                 command=lambda: self.change_to_project_scene(main_frame))
-        project_button.grid(row=1, column=2, ipadx=16)
+        project_button.grid(row=1, column=2)
+        marks_button = Button(sub_frame, text="Mis notas", command=lambda: self.change_to_mark_scene(main_frame))
+        marks_button.grid(row=1, column=3)
         exit_button = Button(sub_frame, text="Salir", command=lambda: self.change_to_log_in(main_frame))
-        exit_button.grid(row=2, column=1, pady=50)
+        exit_button.grid(row=2, column=0, pady=50, columnspan=4)
 
     def exam_scene(self, root):
         main_frame = ttk.Frame(root)
@@ -841,6 +851,42 @@ class App:
         sub_title.pack()
         projects.pack()
 
+    def marks_scene(self, root):
+        main_frame = Frame(root)
+        main_frame.pack()
+
+        tittle = Label(main_frame, text="Tus notas", font=(constantes.TITTLE_FONT, TITTLE_SIZE))
+
+        body = Frame(main_frame, borderwidth=constantes.FRAME_BORDERWIDTH, relief="groove")
+
+        notas_exam = Listbox(body)
+        notas_project = Listbox(body)
+        exam_label = Label(body, text="Exámenes:")
+        project_label = Label(body, text="Proyectos:")
+        quit_button = Button(body, text="Quit", command= lambda: self.change_to_user_functionality(main_frame))
+
+        select_fm = Frame(body)
+        subj_box = Entry(select_fm)
+        select_lb = Label(select_fm, text="Asignatura:")
+        err_channel = Label(select_fm, text="", font=(constantes.ERR_FONT, constantes.ERR_MSG_SIZE))
+        select_button = Button(select_fm, text="APPLY", command= lambda: self.apply_selection_mark(subj_box.get(), notas_exam, notas_project, err_channel))
+
+        tittle.pack()
+        body.pack(pady=20)
+
+        select_fm.grid(row=0, column=0, columnspan=2)
+        exam_label.grid(row=1, column=0)
+        project_label.grid(row=1, column=1)
+        notas_exam.grid(row=2, column=0, pady=10, padx=10)
+        notas_project.grid(row=2, column=1, pady=10, padx=10)
+        quit_button.grid(row=3, column=0, columnspan=2, pady=20)
+
+        select_lb.grid(row=0, column=0, pady=5)
+        subj_box.grid(row=0, column=1, pady=5)
+        select_button.grid(row=1, column=0, columnspan=2)
+        err_channel.grid(row=2, column=0, columnspan=2)
+
+
     # == FUNCIONES AUXILIARES PARA BOTONES ==
     def apply_selection_exam(self, subject, date, channel, old_subject_box, old_date_box, old_mark_box):
         valid_s, err_msg = self.validate_date_existence(date, subject, 'EXAM')
@@ -883,3 +929,24 @@ class App:
         old_subject_box.config(state=DISABLED)
         old_date_box.config(state=DISABLED)
         old_mark_box.config(state=DISABLED)
+
+    def apply_selection_mark(self, subject, list_box_exams, list_box_projects, err_channel):
+        valid, err_msg = self.validate_subject(subject, True)
+        if not valid:
+            err_channel.config(text=err_msg, fg='red')
+            return
+        err_channel.config(text="Aplicando selección", fg='green')
+        list_box_exams.delete(0, END)
+        list_box_projects.delete(0, END)
+        for e in self.curr_user.exams.data[subject]:
+            mark = self.curr_user.check_event_mark(subject, e, 'EXAM')
+            if mark == -1:
+                mark = "-"
+            list_box_exams.insert(END, e + " = " + str(mark))
+
+        for e in self.curr_user.projects.data[subject]:
+            mark = self.curr_user.check_event_mark(subject, e, 'PROJECT')
+            if mark == -1:
+                mark = "sin nota..."
+            list_box_projects.insert(END, e + " = " + str(mark))
+
