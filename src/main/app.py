@@ -90,8 +90,10 @@ class App:
         self.error_stream.config(text="")
 
     def app_login_user(self, user_name, password, label, frame):
+        label.config(text="")
         self.curr_user = user.login_user(user_name, password)
         if not self.curr_user:
+            print("pito")
             self.password_tries -= 1
             label.config(text="Bad log in")
         else:
@@ -99,7 +101,6 @@ class App:
             self.change_to_user_functionality(frame)
             return
         print(self.password_tries)
-        label.config(text="")
         if self.password_tries == 1:
             print("warning_message: fallos por numero de intentos")
             self.error_stream.config(text="Si fallas una vez más\nla aplicación se bloqueará 5 segundos")
@@ -110,7 +111,6 @@ class App:
             self.password_tries = 3
             self.log_in_scene(self.main_frame)
             return
-
 
     def app_register_user(self, user_name, password, frame, root, bad_label):
         bad_label.config(text="")
@@ -406,7 +406,7 @@ class App:
         sub_frame = Frame(main_frame, borderwidth=3, relief="groove")
         sub_frame.grid(row=1, column=0)
         sub_title = Label(sub_frame, text="Qué quiere consultar?", font=(constantes.SUBTITLE_FONT, SUBTITLE_SIZE))
-        sub_title.grid(row=0, column=0, columnspan=4)
+        sub_title.grid(row=0, column=0, columnspan=4, ipady=10)
         subj_button = Button(sub_frame, text="Asignaturas", command=lambda: self.change_to_subject_scene(main_frame))
         subj_button.grid(row=1, column=0)
         exams_button = Button(sub_frame, text="Exams", command=lambda: self.change_to_exam_scene(main_frame))
@@ -859,17 +859,27 @@ class App:
 
         body = Frame(main_frame, borderwidth=constantes.FRAME_BORDERWIDTH, relief="groove")
 
-        notas_exam = Listbox(body)
-        notas_project = Listbox(body)
+        exams_frame = Frame(body)
+        scroll_exams = Scrollbar(exams_frame, orient=VERTICAL)
+        notas_exam = Listbox(exams_frame, yscrollcommand=scroll_exams.set)
+        scroll_exams.config(command=notas_exam.yview)
+
+        projects_frame = Frame(body)
+        scroll_project = Scrollbar(projects_frame, orient=VERTICAL)
+        notas_project = Listbox(projects_frame, yscrollcommand=scroll_project.set)
+        scroll_project.config(command=notas_project.yview)
+
         exam_label = Label(body, text="Exámenes:")
         project_label = Label(body, text="Proyectos:")
-        quit_button = Button(body, text="Quit", command= lambda: self.change_to_user_functionality(main_frame))
+        quit_button = Button(body, text="Quit", command=lambda: self.change_to_user_functionality(main_frame))
 
         select_fm = Frame(body)
         subj_box = Entry(select_fm)
         select_lb = Label(select_fm, text="Asignatura:")
         err_channel = Label(select_fm, text="", font=(constantes.ERR_FONT, constantes.ERR_MSG_SIZE))
-        select_button = Button(select_fm, text="APPLY", command= lambda: self.apply_selection_mark(subj_box.get(), notas_exam, notas_project, err_channel))
+        select_button = Button(select_fm, text="APPLY",
+                               command=lambda: self.apply_selection_mark(subj_box.get(), notas_exam, notas_project,
+                                                                         err_channel))
 
         tittle.pack()
         body.pack(pady=20)
@@ -877,8 +887,8 @@ class App:
         select_fm.grid(row=0, column=0, columnspan=2)
         exam_label.grid(row=1, column=0)
         project_label.grid(row=1, column=1)
-        notas_exam.grid(row=2, column=0, pady=10, padx=10)
-        notas_project.grid(row=2, column=1, pady=10, padx=10)
+        exams_frame.grid(row=2, column=0, pady=10, padx=10)
+        projects_frame.grid(row=2, column=1, pady=10, padx=10)
         quit_button.grid(row=3, column=0, columnspan=2, pady=20)
 
         select_lb.grid(row=0, column=0, pady=5)
@@ -886,6 +896,10 @@ class App:
         select_button.grid(row=1, column=0, columnspan=2)
         err_channel.grid(row=2, column=0, columnspan=2)
 
+        notas_exam.pack(side=LEFT)
+        scroll_exams.pack(sid=RIGHT, fill=BOTH)
+        notas_project.pack(side=LEFT)
+        scroll_project.pack(side=RIGHT, fill=BOTH)
 
     # == FUNCIONES AUXILIARES PARA BOTONES ==
     def apply_selection_exam(self, subject, date, channel, old_subject_box, old_date_box, old_mark_box):
@@ -949,4 +963,3 @@ class App:
             if mark == -1:
                 mark = "sin nota..."
             list_box_projects.insert(END, e + " = " + str(mark))
-

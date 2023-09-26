@@ -190,6 +190,8 @@ class DataBase:
             data = [
                 ("pepe", "matematicas", "2012-01-01", "EXAM", 9),
                 ("pepe", "lengua", "2013-12-12", "EXAM", 8),
+                ("pepe", "lengua", "2014-12-12", "EXAM", 8),
+                ("pepe", "lengua", "2015-12-12", "EXAM", 8),
                 ("pepe", "ingles", "2014-12-12", "EXAM", 7),
                 ("pepe", "naturales", "2015-12-12", "EXAM", 6),
                 ("pepe", "sociales", "2016-12-12", "EXAM", 5),

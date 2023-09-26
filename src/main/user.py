@@ -16,6 +16,9 @@ class MyDict:
             out += i + ": " + str(exams_i) + "\n"
         return out
 
+    def list(self):
+        return self.data.items()
+
 
 def register_user(user_name: str, password: str):
     db = DataBase()
