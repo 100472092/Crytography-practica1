@@ -67,17 +67,16 @@ class DataBase:
                 return user
             return None
 
-        def search_pw(self, password_tk: str):
+        def extract_user_creds(self, user_name: str):
             """Busca un password token en las credenciales y, si coincide con uno dado, devuelve true"""
             self.open()
-            sql = "SELECT PASSWORD FROM USER_CREDS WHERE PASSWORD=?"
-            data = self.base.execute(sql, (password_tk,))
+            sql = "SELECT * FROM USER_CREDS WHERE USER_NAME=?"
+            data = self.base.execute(sql, (user_name,))
             data = data.fetchall()
             self.close()
-            if len(data) >= 1:
-                # print("found")
-                return True  # no devolvemos el pw_token por seguridad
-            return False
+            if len(data) == 0:
+                return None
+            return data[0]
 
         def search_subject(self, user: str, subject: str):
             """busca una asignatura para un usuario, si existe, la devuelve"""
@@ -97,11 +96,11 @@ class DataBase:
             data = data.fetchall()
             return data
 
-        def register_new_user(self, user: str, password_token: str):
+        def register_new_user(self, user: str, password_token: str, salt: str):
             """annade un nuevo usuario a la base de datos"""
             self.open()
-            sql = "INSERT INTO USER_CREDS (USER_NAME, PASSWORD) VALUES(?, ?)"
-            self.base.execute(sql, (user, password_token))
+            sql = "INSERT INTO USER_CREDS (USER_NAME, PASSWORD, SALT) VALUES(?, ?, ?)"
+            self.base.execute(sql, (user, password_token, salt))
             self.base.commit()
             self.close()
 
@@ -171,11 +170,11 @@ class DataBase:
         def insert_test_case(self):
             self.open()
             data = [
-                ("pepe", "1234"),
-                ("juan", "1234"),
-                ("sabrina", "1234"),
+                ("pepe", "1234", "0"),
+                ("juan", "1234", "0"),
+                ("sabrina", "1234", "0"),
             ]
-            self.base.executemany("INSERT INTO USER_CREDS (USER_NAME, PASSWORD) VALUES(?, ?)", data)
+            self.base.executemany("INSERT INTO USER_CREDS (USER_NAME, PASSWORD, SALT) VALUES(?, ?, ?)", data)
             data = [
                 ("pepe", "matematicas"),
                 ("pepe", "lengua"),
@@ -240,4 +239,6 @@ if __name__ == "__main__":
     control = input("wanna insert test data?[Y/N]: ")
     if control == "Y":
         db.insert_test_case()
+
+    db.extract_user_creds("pepe")
     db.print_all()

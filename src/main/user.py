@@ -1,5 +1,7 @@
 """this class encapsules user funtionality"""
 from data_base_gestor import DataBase
+import cifrado
+import base64
 
 
 class MyDict:
@@ -26,16 +28,19 @@ def register_user(user_name: str, password: str):
     if user_name == "" or db.search_user(user_name.lower()) or password == "":
         print("Register_user: No se pudo registrar al usuario (bad_name)")
         return
-    # TODO: CIFRAR CONTRASEÑA
-    db.register_new_user(user_name.lower(), password)
+    pw_token, salt = cifrado.cifrar(password)
+
+    db.register_new_user(user_name.lower(), pw_token, salt)
     return True
 
 
 def login_user(user_name: str, pw: str):
     db = DataBase()  # TODO: cifrar contraseña
-    if db.search_user(user_name) and db.search_pw(pw):
+    user_data = db.extract_user_creds(user_name)
+    if user_data:
         print("log_in: Usuario encontrado")
-        return User(user_name)
+        if cifrado.verify_pw(pw, user_data[1], user_data[2]):
+            return User(user_name)
     print("log_in: Usuario no encontrado")
     return None
 

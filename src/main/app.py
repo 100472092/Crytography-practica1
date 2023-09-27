@@ -93,7 +93,6 @@ class App:
         label.config(text="")
         self.curr_user = user.login_user(user_name, password)
         if not self.curr_user:
-            print("pito")
             self.password_tries -= 1
             label.config(text="Bad log in")
         else:
@@ -457,7 +456,7 @@ class App:
         sub_frame = Frame(main_frame, borderwidth=constantes.FRAME_BORDERWIDTH, relief="groove", padx=5, pady=5)
         sub_frame.grid(row=1, column=0, ipady=23)
         subj_label = Label(sub_frame, text="Asignatura*")
-        date_label = Label(sub_frame, text="Fecha*")
+        date_label = Label(sub_frame, text="Fecha*\n[YYYY-MM-DD]")
         mark_label = Label(sub_frame, text="Nota")
         subj_label.grid(row=0, column=0)
         date_label.grid(row=1, column=0)
@@ -500,7 +499,7 @@ class App:
         select_subj = Entry(select_frame)
         select_date = Entry(select_frame)
         select_subj_label = Label(select_frame, text="Asignatura")
-        select_date_label = Label(select_frame, text="Fecha")
+        select_date_label = Label(select_frame, text="Fecha\n[YYYY-MM-DD]")
         select_label = Label(select_frame, text="Seleccion:")
         apply_button = Button(select_frame, text="Aplicar selección",
                               command=lambda: self.apply_selection_exam(select_subj.get(), select_date.get(),
@@ -528,7 +527,7 @@ class App:
         old_label.grid(row=0, column=0)
         new_label.grid(row=0, column=2)
         Label(change_frame, text="Asignatura").grid(row=1, column=1)
-        Label(change_frame, text="Fecha").grid(row=2, column=1)
+        Label(change_frame, text="Fecha\n[YYYY-MM-DD]").grid(row=2, column=1)
         Label(change_frame, text="Nota").grid(row=3, column=1)
         old_subj_box.grid(row=1, column=0)
         old_date_box.grid(row=2, column=0)
@@ -564,7 +563,7 @@ class App:
         sub_frame = Frame(main_frame, borderwidth=constantes.FRAME_BORDERWIDTH, relief="groove", padx=5, pady=5)
         sub_frame.grid(row=1, column=0, ipady=23)
         subj_label = Label(sub_frame, text="Asignatura*")
-        date_label = Label(sub_frame, text="Fecha*")
+        date_label = Label(sub_frame, text="Fecha*\n[YYYY-MM-DD]")
         subj_label.grid(row=0, column=0)
         date_label.grid(row=1, column=0)
         subj_box = Entry(sub_frame)
@@ -721,7 +720,7 @@ class App:
         sub_frame = Frame(main_frame, borderwidth=constantes.FRAME_BORDERWIDTH, relief="groove", padx=5, pady=5)
         sub_frame.grid(row=1, column=0, ipady=23)
         subj_label = Label(sub_frame, text="Asignatura*")
-        date_label = Label(sub_frame, text="Fecha*")
+        date_label = Label(sub_frame, text="Fecha*\n[YYYY-MM-DD]")
         mark_label = Label(sub_frame, text="Nota")
         subj_label.grid(row=0, column=0)
         date_label.grid(row=1, column=0)
@@ -764,7 +763,7 @@ class App:
         select_subj = Entry(select_frame)
         select_date = Entry(select_frame)
         select_subj_label = Label(select_frame, text="Asignatura")
-        select_date_label = Label(select_frame, text="Fecha")
+        select_date_label = Label(select_frame, text="Fecha\n[YYYY-MM-DD]")
         select_label = Label(select_frame, text="Seleccion:")
         apply_button = Button(select_frame, text="Aplicar selección",
                               command=lambda: self.apply_selection_project(select_subj.get(), select_date.get(),
@@ -793,7 +792,7 @@ class App:
         old_label.grid(row=0, column=0)
         new_label.grid(row=0, column=2)
         Label(change_frame, text="Asignatura").grid(row=1, column=1)
-        Label(change_frame, text="Fecha").grid(row=2, column=1)
+        Label(change_frame, text="Fecha\n[YYYY-MM-DD]").grid(row=2, column=1)
         Label(change_frame, text="Nota").grid(row=3, column=1)
         old_subj_box.grid(row=1, column=0)
         old_date_box.grid(row=2, column=0)
@@ -830,7 +829,7 @@ class App:
         sub_frame = Frame(main_frame, borderwidth=constantes.FRAME_BORDERWIDTH, relief="groove", padx=5, pady=5)
         sub_frame.grid(row=1, column=0, ipady=23)
         subj_label = Label(sub_frame, text="Asignatura*")
-        date_label = Label(sub_frame, text="Fecha*")
+        date_label = Label(sub_frame, text="Fecha*\n[YYYY-MM-DD]")
         subj_label.grid(row=0, column=0)
         date_label.grid(row=1, column=0)
         subj_box = Entry(sub_frame)

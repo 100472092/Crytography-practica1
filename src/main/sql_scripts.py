@@ -7,7 +7,8 @@ DROP_TABLES = """
 CREATE_TABLES = """
                 CREATE TABLE USER_CREDS (
                     USER_NAME TEXT PRIMARY KEY, 
-                    PASSWORD TEXT NOT NULL
+                    PASSWORD TEXT NOT NULL,
+                    SALT TEXT NOT NULL
                 );
                 
                 CREATE TABLE USER_SUBJ (
