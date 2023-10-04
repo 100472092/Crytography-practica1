@@ -758,7 +758,7 @@ class App:
         projects = Label(projects_frame, text=self.curr_user.projects.__str__(), justify=LEFT)
 
         select_frame = Frame(body_frame, borderwidth=constantes.FRAME_BORDERWIDTH, relief="groove")
-        select_frame.pack(ipady=5)
+        select_frame.pack(ipady=5, ipadx=5)
         err_communication = Label(select_frame, text="", font=(constantes.ERR_FONT, ERR_MSG_SIZE), pady=5)
         select_subj = Entry(select_frame)
         select_date = Entry(select_frame)

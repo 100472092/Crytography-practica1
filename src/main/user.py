@@ -28,7 +28,7 @@ def register_user(user_name: str, password: str):
     if user_name == "" or db.search_user(user_name.lower()) or password == "":
         print("Register_user: No se pudo registrar al usuario (bad_name)")
         return
-    pw_token, salt = cifrado.cifrar(password)
+    pw_token, salt = cifrado.hash_password(password)
 
     db.register_new_user(user_name.lower(), pw_token, salt)
     return True

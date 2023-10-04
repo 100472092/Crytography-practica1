@@ -5,7 +5,7 @@ import cryptography.exceptions
 from cryptography.hazmat.primitives.kdf.scrypt import Scrypt
 
 
-def cifrar(user_pw: str):
+def hash_password(user_pw: str):
     salt = os.urandom(16)
 
     kdf = Scrypt(
