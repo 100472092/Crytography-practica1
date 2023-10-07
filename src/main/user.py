@@ -128,7 +128,13 @@ class User:
         if valid:
             print("Error: No existe el " + tipo + " especificado")
             return False
-        return db.search_event(self.user_name, subject, date, tipo).pop()[-1]
+        event = db.search_event(self.user_name, subject, date, tipo).pop()
+        print(event)
+
+        # descifrar la nota
+        nota = None
+
+        return nota
 
     def drop_exam(self, subject: str, date):
         db = DataBase()
