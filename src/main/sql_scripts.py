@@ -8,7 +8,8 @@ CREATE_TABLES = """
                 CREATE TABLE USER_CREDS (
                     USER_NAME TEXT PRIMARY KEY, 
                     PASSWORD TEXT NOT NULL,
-                    SALT TEXT NOT NULL
+                    SALT_PW TEXT NOT NULL,
+                    SALT_KEY TEXT NUT NULL
                 );
                 
                 CREATE TABLE USER_SUBJ (
@@ -25,6 +26,8 @@ CREATE_TABLES = """
                     FECHA DATE,
                     TIPO TEXT,
                     NOTA INTEGER,
+                    SALT_FECHA TEXT NOT NULL,
+                    SALT_NOTA TEXT NOT NULL,
                     
                     PRIMARY KEY(USER_NAME, SUBJECT, FECHA, TIPO),
                     FOREIGN KEY(USER_NAME, SUBJECT) REFERENCES USER_SUBJ(USER_NAME, SUBJECT)

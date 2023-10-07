@@ -96,11 +96,11 @@ class DataBase:
             data = data.fetchall()
             return data
 
-        def register_new_user(self, user: str, password_token: str, salt: str):
+        def register_new_user(self, user: str, password_token: str, salt_pw: str, salt_key: str):
             """annade un nuevo usuario a la base de datos"""
             self.open()
-            sql = "INSERT INTO USER_CREDS (USER_NAME, PASSWORD, SALT) VALUES(?, ?, ?)"
-            self.base.execute(sql, (user, password_token, salt))
+            sql = "INSERT INTO USER_CREDS (USER_NAME, PASSWORD, SALT_PW, SALT_KEY) VALUES(?, ?, ?, ?)"
+            self.base.execute(sql, (user, password_token, salt_pw, salt_key))
             self.base.commit()
             self.close()
 
@@ -174,7 +174,7 @@ class DataBase:
                 ("juan", "1234", "0"),
                 ("sabrina", "1234", "0"),
             ]
-            self.base.executemany("INSERT INTO USER_CREDS (USER_NAME, PASSWORD, SALT) VALUES(?, ?, ?)", data)
+            self.base.executemany("INSERT INTO USER_CREDS (USER_NAME, PASSWORD, SALT_PW) VALUES(?, ?, ?)", data)
             data = [
                 ("pepe", "matematicas"),
                 ("pepe", "lengua"),
