@@ -59,9 +59,10 @@ def cifrado_autenticado(new_data, derived_key):
 def descifrado_autenticado(derived_key, nonce, encrypted_data):
     derived_key = base64.b64decode(bytes(derived_key, 'ascii'))
     encrypted_data = base64.b64decode(bytes(encrypted_data, 'ascii'))
+    nonce = base64.b64decode(bytes(nonce, 'ascii'))
     chacha = ChaCha20Poly1305(derived_key)
     clear_data = chacha.decrypt(nonce, encrypted_data, None)
-    clear_data = base64.b64encode(clear_data).decode('ascii')
+    clear_data = clear_data.decode('ascii')
     return clear_data
 
 

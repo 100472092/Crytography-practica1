@@ -115,7 +115,7 @@ class DataBase:
         def register_new_event(self, user: str, subject: str, fecha: str, tipo: str, nota: str, nonce_nota: str):
             """annade un nuevo evento (exam/project) a la base de datos"""
             self.open()
-            sql = "INSERT INTO USER_EVENT (USER_NAME, SUBJECT, FECHA, TIPO, NOTA, NONCE_NOTA) VALUES(?, ?, ?, ?, ?,?)"
+            sql = "INSERT INTO USER_EVENT (USER_NAME, SUBJECT, FECHA, TIPO, NOTA, NONCE_NOTA) VALUES(?, ?, ?, ?, ?, ?)"
             self.base.execute(sql, (user, subject, fecha, tipo, nota, nonce_nota))
             self.base.commit()
             self.close()
