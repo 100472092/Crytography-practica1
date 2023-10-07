@@ -25,9 +25,8 @@ CREATE_TABLES = """
                     SUBJECT TEXT,
                     FECHA DATE,
                     TIPO TEXT,
-                    NOTA INTEGER,
-                    SALT_FECHA TEXT NOT NULL,
-                    SALT_NOTA TEXT NOT NULL,
+                    NOTA TEXT,
+                    NONCE_NOTA TEXT NOT NULL,
                     
                     PRIMARY KEY(USER_NAME, SUBJECT, FECHA, TIPO),
                     FOREIGN KEY(USER_NAME, SUBJECT) REFERENCES USER_SUBJ(USER_NAME, SUBJECT)

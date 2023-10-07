@@ -22,32 +22,34 @@ class MyDict:
         return self.data.items()
 
 
-def register_user(user_name: str, password: str):
+def register_user(user_name: str, password: str): #aquí añadir edad y universidad
     db = DataBase()
 
     if user_name == "" or db.search_user(user_name.lower()) or password == "":
         print("Register_user: No se pudo registrar al usuario (bad_name)")
         return
-    pw_token, salt = cifrado.hash_password(password)
-
-    db.register_new_user(user_name.lower(), pw_token, salt)
+    pw_token, salt_password = cifrado.hash_password(password)
+    derived_salt = cifrado.generar_salt()
+    #aquí iría el cifrado de datos como edad y universidad, con cifrado.cifrado_autenticado
+    db.register_new_user(user_name.lower(), pw_token, salt_password, derived_salt)
     return True
 
 
 def login_user(user_name: str, pw: str):
-    db = DataBase()  # TODO: cifrar contraseña
+    db = DataBase()
     user_data = db.extract_user_creds(user_name)
     if user_data:
         print("log_in: Usuario encontrado")
         if cifrado.verify_pw(pw, user_data[1], user_data[2]):
-            return User(user_name)
+            return User(user_name, cifrado.derivar_key(pw, user_data[3]))
     print("log_in: Usuario no encontrado")
     return None
 
 
 class User:
-    def __init__(self, user_name):
+    def __init__(self, user_name, key):
         self.user_name = user_name
+        self.key = key
 
     @property
     def exams(self):
@@ -101,7 +103,8 @@ class User:
             print("Ese examen ya está registrado!!")
             return False
         else:
-            db.register_new_event(self.user_name, subject, date, "EXAM", nota)
+            nota, nonce_nota = cifrado.cifrado_autenticado(nota, self.key)
+            db.register_new_event(self.user_name, subject, date, "EXAM", nota, nonce_nota)
             return True
 
     def modify_exam(self, subject: str, old_date: str, new_subject, new_date, mark):
@@ -109,7 +112,8 @@ class User:
         if subject not in self.subjects or old_date not in self.exams.data[subject]:
             return False
         db.delete_event(self.user_name, subject, old_date, 'EXAM')
-        db.register_new_event(self.user_name, new_subject, new_date, 'EXAM', mark)
+        mark, nonce_mark = cifrado.cifrado_autenticado(mark, self.key)
+        db.register_new_event(self.user_name, new_subject, new_date, 'EXAM', mark, nonce_mark)
         return True
 
     def check_event_mark(self, subject: str, date: str, tipo: str):
@@ -134,14 +138,15 @@ class User:
         db.delete_event(self.user_name, subject, date, 'EXAM')
         return True
 
-    def add_project(self, subject, fecha, mark):
+    def add_project(self, subject, date, mark):
         db = DataBase()
         project_list = db.projects_from_subject(self.user_name, subject)
-        if fecha in project_list:
+        if date in project_list:
             print("Ese proyecto ya está registrado!!")
             return False
         else:
-            db.register_new_event(self.user_name, subject, fecha, "PROJECT", mark)
+            mark, nonce_mark = cifrado.cifrado_autenticado(mark, self.key)
+            db.register_new_event(self.user_name, subject, date, "PROJECT", mark, nonce_mark)
             return True
 
     def modify_project(self, subject: str, old_date, new_subject, new_date, mark):
@@ -149,7 +154,8 @@ class User:
         if subject not in self.subjects or old_date not in self.projects.data[subject]:
             return False
         db.delete_event(self.user_name, subject, old_date, 'PROJECT')
-        db.register_new_event(self.user_name, new_subject, new_date, 'PROJECT', mark)
+        mark, nonce_mark = cifrado.cifrado_autenticado(mark, self.key)
+        db.register_new_event(self.user_name, new_subject, new_date, 'PROJECT', mark, nonce_mark)
         return True
 
     def drop_project(self, subject: str, date):
