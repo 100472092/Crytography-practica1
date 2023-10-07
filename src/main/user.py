@@ -103,7 +103,7 @@ class User:
             print("Ese examen ya está registrado!!")
             return False
         else:
-            nota, nonce_nota = cifrado.cifrado_autenticado(nota, self.key)
+            nota, nonce_nota = cifrado.cifrado_autenticado(str(nota), self.key)
             db.register_new_event(self.user_name, subject, date, "EXAM", nota, nonce_nota)
             return True
 
@@ -112,7 +112,7 @@ class User:
         if subject not in self.subjects or old_date not in self.exams.data[subject]:
             return False
         db.delete_event(self.user_name, subject, old_date, 'EXAM')
-        mark, nonce_mark = cifrado.cifrado_autenticado(mark, self.key)
+        mark, nonce_mark = cifrado.cifrado_autenticado(str(mark), self.key)
         db.register_new_event(self.user_name, new_subject, new_date, 'EXAM', mark, nonce_mark)
         return True
 
@@ -148,7 +148,7 @@ class User:
             print("Ese proyecto ya está registrado!!")
             return False
         else:
-            mark, nonce_mark = cifrado.cifrado_autenticado(mark, self.key)
+            mark, nonce_mark = cifrado.cifrado_autenticado(str(mark), self.key)
             db.register_new_event(self.user_name, subject, date, "PROJECT", mark, nonce_mark)
             return True
 
@@ -157,7 +157,7 @@ class User:
         if subject not in self.subjects or old_date not in self.projects.data[subject]:
             return False
         db.delete_event(self.user_name, subject, old_date, 'PROJECT')
-        mark, nonce_mark = cifrado.cifrado_autenticado(mark, self.key)
+        mark, nonce_mark = cifrado.cifrado_autenticado(str(mark), self.key)
         db.register_new_event(self.user_name, new_subject, new_date, 'PROJECT', mark, nonce_mark)
         return True
 
