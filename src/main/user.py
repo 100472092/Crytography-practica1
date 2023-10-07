@@ -131,7 +131,7 @@ class User:
         event = db.search_event(self.user_name, subject, date, tipo).pop()
         nota, nonce_nota = event[-2], event[-1]
         nota = cifrado.descifrado_autenticado(self.key, nonce_nota, nota)
-        return nota
+        return int(nota)
 
     def drop_exam(self, subject: str, date):
         db = DataBase()
