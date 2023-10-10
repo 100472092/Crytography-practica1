@@ -109,7 +109,7 @@ class DataBase:
             data = data.fetchall()
             return data
 
-        def register_new_user(self, user: str, password_token: str, salt_pw: str, salt_key: str, universidad: str, edad:str):
+        def register_new_user(self, user: str, password_token: str, salt_pw: str, salt_key: str, universidad: str, edad: str):
             """annade un nuevo usuario a la base de datos"""
             self.open()
             sql = "INSERT INTO USER_CREDS (USER_NAME, PASSWORD, SALT_PW, SALT_KEY, UNIVERSIDAD, EDAD) VALUES(?, ?, ?, ?, ?, ?)"

@@ -56,6 +56,23 @@ class App:
             return False, "La nota debe ser un número entero"
         return True, ""
 
+    @staticmethod
+    def validate_university(university: str):
+        if len(university) <= 0:
+            return False, "Universidad no puede ser un campo vacío"
+        return True, ""
+
+    @staticmethod
+    def validate_age(age: str):
+        try:
+            if age == "":
+                return False, "Edad no puede ser un campo vacío"
+            age = int(age)
+            if age < 0:
+                return False, "La edad no puede ser negativa"
+        except ValueError:
+            return False, "La edad debe ser un número"
+        return True, ""
     def validate_subject(self, subject, ev_existence=False):
         if len(subject) <= 0:
             return False, "campo de asignatura vacío"
@@ -111,9 +128,19 @@ class App:
             self.log_in_scene(self.main_frame)
             return
 
-    def app_register_user(self, user_name, password, frame, root, bad_label):
+    def app_register_user(self, user_name, password, university, age, frame, root, bad_label):
         bad_label.config(text="")
-        if not user.register_user(user_name, password):
+        valid, err_msg = self.validate_university(university)
+        if not valid:
+            bad_label.config(text=err_msg)
+            return
+
+        valid, err_msg = self.validate_age(age)
+        if not valid:
+            bad_label.config(text=err_msg)
+            return
+
+        if not user.register_user(user_name, password, university, age):
             bad_label.config(text="bad name", font=(constantes.ERR_FONT, ERR_MSG_SIZE))
             return
         frame.destroy()
@@ -385,12 +412,21 @@ class App:
         user_pw_label.pack()
         user_pw_box = Entry(main_frame, show="*")
         user_pw_box.pack()
+        university_label = Label(main_frame, text="Universidad::")
+        university_box = Entry(main_frame)
+        age_label = Label(main_frame, text="Edad:")
+        age_box = Entry(main_frame)
+        university_label.pack()
+        university_box.pack()
+        age_label.pack()
+        age_box.pack()
         sub_frame = Frame(main_frame)
         sub_frame.pack()
         bad_name = Label(main_frame, text="", fg='red')
         bad_name.pack(side=BOTTOM)
         register_button = Button(sub_frame, text="registrar",
                                  command=lambda: self.app_register_user(user_name_box.get(), user_pw_box.get(),
+                                                                        university_box.get(), age_box.get(),
                                                                         main_frame, root, bad_name))
         register_button.grid(row=0, column=0, pady=10, padx=10)
         exit_button = Button(sub_frame, text="salir",

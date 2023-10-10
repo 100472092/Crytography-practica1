@@ -31,8 +31,8 @@ def register_user(user_name: str, password: str, universidad: str, edad: str):
     pw_token, salt_password = cifrado.hash_password(password)
     derived_salt = cifrado.generar_salt()
     derived_key = cifrado.derivar_key(password, derived_salt)
-    universidad = cifrado.cifrado_autenticado(universidad, derived_key)
-    edad = cifrado.cifrado_autenticado(edad, derived_key)
+    universidad, nonce_universidad = cifrado.cifrado_autenticado(universidad, derived_key)
+    edad, nonce_edad = cifrado.cifrado_autenticado(edad, derived_key)
     db.register_new_user(user_name.lower(), pw_token, salt_password, derived_salt, universidad, edad)
     return True
 
