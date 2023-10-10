@@ -104,16 +104,16 @@ class DataBase:
 
         def get_user_data(self, user_name: str):
             self.open()
-            sql = "SELECT USER_NAME, UNIVERSIDAD, EDAD FROM USER_CREDS WHERE USER_NAME=?"
+            sql = "SELECT USER_NAME, UNIVERSIDAD, NONCE_UNIVERSIDAD, EDAD, NONCE_EDAD FROM USER_CREDS WHERE USER_NAME=?"
             data = self.base.execute(sql, (user_name,))
             data = data.fetchall()
             return data
 
-        def register_new_user(self, user: str, password_token: str, salt_pw: str, salt_key: str, universidad: str, edad: str):
+        def register_new_user(self, user: str, password_token: str, salt_pw: str, salt_key: str, universidad: str, nonce_universidad: str, edad: str, nonce_edad: str):
             """annade un nuevo usuario a la base de datos"""
             self.open()
-            sql = "INSERT INTO USER_CREDS (USER_NAME, PASSWORD, SALT_PW, SALT_KEY, UNIVERSIDAD, EDAD) VALUES(?, ?, ?, ?, ?, ?)"
-            self.base.execute(sql, (user, password_token, salt_pw, salt_key, universidad, edad))
+            sql = "INSERT INTO USER_CREDS (USER_NAME, PASSWORD, SALT_PW, SALT_KEY, UNIVERSIDAD, NONCE_UNIVERSIDAD, EDAD, NONCE_EDAD) VALUES(?, ?, ?, ?, ?, ?, ?, ?)"
+            self.base.execute(sql, (user, password_token, salt_pw, salt_key, universidad, nonce_universidad, edad, nonce_edad))
             self.base.commit()
             self.close()
 

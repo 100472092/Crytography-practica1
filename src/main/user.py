@@ -33,7 +33,7 @@ def register_user(user_name: str, password: str, universidad: str, edad: str):
     derived_key = cifrado.derivar_key(password, derived_salt)
     universidad, nonce_universidad = cifrado.cifrado_autenticado(universidad, derived_key)
     edad, nonce_edad = cifrado.cifrado_autenticado(edad, derived_key)
-    db.register_new_user(user_name.lower(), pw_token, salt_password, derived_salt, universidad, edad)
+    db.register_new_user(user_name.lower(), pw_token, salt_password, derived_salt, universidad, nonce_universidad, edad, nonce_edad)
     return True
 
 
@@ -76,6 +76,13 @@ class User:
         db = DataBase()
         out = db.subjects_from_user(self.user_name)
         return out
+
+    def get_user_data(self):
+        db = DataBase()
+        data = db.get_user_data(self.user_name)
+        universidad = cifrado.descifrado_autenticado(self.key, data[2], data[1])
+        edad = cifrado.descifrado_autenticado(self.key, data[4], data[3])
+        return self.user_name, universidad, edad
 
     def add_subject(self, new_subject):
         db = DataBase()

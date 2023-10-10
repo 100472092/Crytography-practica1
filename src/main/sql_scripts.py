@@ -11,7 +11,9 @@ CREATE_TABLES = """
                     SALT_PW TEXT NOT NULL,
                     SALT_KEY TEXT NUT NULL,
                     UNIVERSIDAD TEXT NOT NULL,
-                    EDAD TEXT NOT NULL
+                    NONCE_UNIVERSIDAD TEXT NOT NULL,
+                    EDAD TEXT NOT NULL,
+                    NONCE_EDAD TEXT NOT NULL
                 );
                 
                 CREATE TABLE USER_SUBJ (
