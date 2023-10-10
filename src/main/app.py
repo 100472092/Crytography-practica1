@@ -369,6 +369,11 @@ class App:
         frame.destroy()
         self.marks_scene(self.main_frame)
 
+    def change_to_my_data(self, frame):
+        self.error_stream_restore()
+        frame.destroy()
+        self.my_data_scene(self.main_frame)
+
     # == ESCENAS ==
     def log_in_scene(self, root):
         self.error_stream.config(text="")
@@ -441,7 +446,7 @@ class App:
         sub_frame = Frame(main_frame, borderwidth=3, relief="groove")
         sub_frame.grid(row=1, column=0)
         sub_title = Label(sub_frame, text="Qué quiere consultar?", font=(constantes.SUBTITLE_FONT, SUBTITLE_SIZE))
-        sub_title.grid(row=0, column=0, columnspan=4, ipady=10)
+        sub_title.grid(row=0, column=0, columnspan=6, ipady=10)
         subj_button = Button(sub_frame, text="Asignaturas", command=lambda: self.change_to_subject_scene(main_frame))
         subj_button.grid(row=1, column=0)
         exams_button = Button(sub_frame, text="Exams", command=lambda: self.change_to_exam_scene(main_frame))
@@ -451,8 +456,10 @@ class App:
         project_button.grid(row=1, column=2)
         marks_button = Button(sub_frame, text="Mis notas", command=lambda: self.change_to_mark_scene(main_frame))
         marks_button.grid(row=1, column=3)
+        my_data_button = Button(sub_frame, text="Mis datos", command=lambda: self.change_to_my_data(main_frame))
+        my_data_button.grid(row=1, column=5)
         exit_button = Button(sub_frame, text="Salir", command=lambda: self.change_to_log_in(main_frame))
-        exit_button.grid(row=2, column=0, pady=50, columnspan=4)
+        exit_button.grid(row=2, column=0, pady=50, columnspan=6)
 
     def exam_scene(self, root):
         main_frame = ttk.Frame(root)
@@ -935,6 +942,20 @@ class App:
         scroll_exams.pack(sid=RIGHT, fill=BOTH)
         notas_project.pack(side=LEFT)
         scroll_project.pack(side=RIGHT, fill=BOTH)
+
+    def my_data_scene(self, root):
+        main_frame = Frame(root)
+        tittle = Label(main_frame, text="Tus datos", font=(constantes.TITTLE_FONT, constantes.TITTLE_SIZE))
+
+        body = Frame(main_frame, borderwidth=constantes.FRAME_BORDERWIDTH, relief='groove')
+        user_name, university, age = self.curr_user.get_user_data()
+        data_str = "Nombre: " + user_name + "\n\t" + "Universidad: " + university + "\n" + "Edad: " + age
+        data_label = Label(body, text=data_str, font=(constantes.SUBTITLE_FONT, constantes.SUBTITLE_SIZE))
+        main_frame.pack()
+        tittle.pack()
+        body.pack()
+        data_label.pack(ipadx=10)
+
 
     # == FUNCIONES AUXILIARES PARA BOTONES ==
     def apply_selection_exam(self, subject, date, channel, old_subject_box, old_date_box, old_mark_box):

@@ -107,7 +107,7 @@ class DataBase:
             sql = "SELECT USER_NAME, UNIVERSIDAD, NONCE_UNIVERSIDAD, EDAD, NONCE_EDAD FROM USER_CREDS WHERE USER_NAME=?"
             data = self.base.execute(sql, (user_name,))
             data = data.fetchall()
-            return data
+            return data[0]
 
         def register_new_user(self, user: str, password_token: str, salt_pw: str, salt_key: str, universidad: str, nonce_universidad: str, edad: str, nonce_edad: str):
             """annade un nuevo usuario a la base de datos"""

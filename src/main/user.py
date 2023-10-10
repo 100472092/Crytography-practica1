@@ -80,6 +80,7 @@ class User:
     def get_user_data(self):
         db = DataBase()
         data = db.get_user_data(self.user_name)
+        print(data)
         universidad = cifrado.descifrado_autenticado(self.key, data[2], data[1])
         edad = cifrado.descifrado_autenticado(self.key, data[4], data[3])
         return self.user_name, universidad, edad
