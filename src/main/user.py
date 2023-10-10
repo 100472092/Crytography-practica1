@@ -22,7 +22,7 @@ class MyDict:
         return self.data.items()
 
 
-def register_user(user_name: str, password: str): #aquí añadir edad y universidad
+def register_user(user_name: str, password: str, universidad: str, edad: str):
     db = DataBase()
 
     if user_name == "" or db.search_user(user_name.lower()) or password == "":
@@ -30,8 +30,10 @@ def register_user(user_name: str, password: str): #aquí añadir edad y universi
         return
     pw_token, salt_password = cifrado.hash_password(password)
     derived_salt = cifrado.generar_salt()
-    #aquí iría el cifrado de datos como edad y universidad, con cifrado.cifrado_autenticado
-    db.register_new_user(user_name.lower(), pw_token, salt_password, derived_salt)
+    derived_key = cifrado.derivar_key(password, derived_salt)
+    universidad = cifrado.cifrado_autenticado(universidad, derived_key)
+    edad = cifrado.cifrado_autenticado(edad, derived_key)
+    db.register_new_user(user_name.lower(), pw_token, salt_password, derived_salt, universidad, edad)
     return True
 
 
@@ -41,6 +43,8 @@ def login_user(user_name: str, pw: str):
     if user_data:
         print("log_in: Usuario encontrado")
         if cifrado.verify_pw(pw, user_data[1], user_data[2]):
+            new_token, new_salt = cifrado.hash_password(pw)
+            db.update_user_creds(user_name, new_token, new_salt)
             return User(user_name, cifrado.derivar_key(pw, user_data[3]))
     print("log_in: Usuario no encontrado")
     return None

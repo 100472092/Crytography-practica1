@@ -78,6 +78,12 @@ class DataBase:
                 return None
             return data[0]
 
+        def update_user_creds(self, user_name: str, new_token: str, new_salt:str):
+            self.open()
+            sql = "UPDATE USER_CREDS SET PASSWORD=?, SALT_PW=? FROM (SELECT USER_NAME, PASSWORD, SALT_PW FROM USER_CREDS WHERE USER_NAME=?)"
+            self.base.execute(sql, (new_token, new_salt, user_name))
+            self.close()
+
         def search_subject(self, user: str, subject: str):
             """busca una asignatura para un usuario, si existe, la devuelve"""
             self.open()
@@ -96,11 +102,18 @@ class DataBase:
             data = data.fetchall()
             return data
 
-        def register_new_user(self, user: str, password_token: str, salt_pw: str, salt_key: str):
+        def get_user_data(self, user_name: str):
+            self.open()
+            sql = "SELECT USER_NAME, UNIVERSIDAD, EDAD FROM USER_CREDS WHERE USER_NAME=?"
+            data = self.base.execute(sql, (user_name,))
+            data = data.fetchall()
+            return data
+
+        def register_new_user(self, user: str, password_token: str, salt_pw: str, salt_key: str, universidad: str, edad:str):
             """annade un nuevo usuario a la base de datos"""
             self.open()
-            sql = "INSERT INTO USER_CREDS (USER_NAME, PASSWORD, SALT_PW, SALT_KEY) VALUES(?, ?, ?, ?)"
-            self.base.execute(sql, (user, password_token, salt_pw, salt_key))
+            sql = "INSERT INTO USER_CREDS (USER_NAME, PASSWORD, SALT_PW, SALT_KEY, UNIVERSIDAD, EDAD) VALUES(?, ?, ?, ?, ?, ?)"
+            self.base.execute(sql, (user, password_token, salt_pw, salt_key, universidad, edad))
             self.base.commit()
             self.close()
 

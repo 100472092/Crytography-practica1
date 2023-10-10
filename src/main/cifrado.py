@@ -25,7 +25,7 @@ def hash_password(user_pw: str):
     return password_token, salt
 
 
-def verify_pw(in_pw: str, password_token: str, salt:str):
+def verify_pw(in_pw: str, password_token: str, salt: str):
     salt = bytes(salt, 'ascii')
     password_token = bytes(password_token, 'ascii')
 
