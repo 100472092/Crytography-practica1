@@ -9,7 +9,9 @@ CREATE_TABLES = """
                     USER_NAME TEXT PRIMARY KEY, 
                     PASSWORD TEXT NOT NULL,
                     SALT_PW TEXT NOT NULL,
-                    SALT_KEY TEXT NUT NULL
+                    SALT_KEY TEXT NUT NULL,
+                    UNIVERSIDAD TEXT NOT NULL,
+                    EDAD TEXT NOT NULL
                 );
                 
                 CREATE TABLE USER_SUBJ (
