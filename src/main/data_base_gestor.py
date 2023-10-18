@@ -63,7 +63,6 @@ class DataBase:
             data = data.fetchall()
             self.close()
             if len(data) >= 1:
-                # print("found")
                 return user
             return None
 
@@ -91,7 +90,6 @@ class DataBase:
             data = self.base.execute(sql, (user, subject))
             data = data.fetchall()
             if len(data) >= 1:
-                print("found")
                 return subject
             return None
 

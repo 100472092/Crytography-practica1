@@ -80,7 +80,6 @@ class User:
     def get_user_data(self):
         db = DataBase()
         data = db.get_user_data(self.user_name)
-        print(data)
         universidad = cifrado.descifrado_autenticado(self.key, data[2], data[1])
         edad = cifrado.descifrado_autenticado(self.key, data[4], data[3])
         return self.user_name, universidad, edad
@@ -90,9 +89,9 @@ class User:
         new_subject = new_subject.lower()
         # TODO: Añadir salida
         if db.search_subject(self.user_name, new_subject):
-            print("ADD_SUBJECT: Asignatura ya existente!")
+            print("add_subject: Asignatura ya existente!")
             return False
-        print("ADD_SUBJECT: asignatura añadida")
+        print("add_subject: asignatura añadida")
         db.register_new_subject(self.user_name, new_subject.lower())
         return True
 
@@ -100,9 +99,9 @@ class User:
         db = DataBase()
         subjects_list = db.subjects_from_user(self.user_name)
         if not subject.lower() in subjects_list:
-            print("DROP_SUBJECT: ASIGNATURA NO EXISTE!!")
+            print("drop_subject: ASIGNATURA NO EXISTE!!")
             return False
-        print("DROP_SUBJECT: ASIGNATURA ELIMINADA")
+        print("drop_subject: ASIGNATURA ELIMINADA")
         db.delete_subject_from_user(self.user_name, subject)
         return True
 
@@ -112,7 +111,7 @@ class User:
         db = DataBase()
         exams_lists = db.exams_from_subject(self.user_name, subject)
         if date in exams_lists:
-            print("Ese examen ya está registrado!!")
+            print("add_exam: ese examen ya está registrado")
             return False
         else:
             nota, nonce_nota = cifrado.cifrado_autenticado(str(nota), self.key)
@@ -135,10 +134,10 @@ class User:
         elif tipo == 'PROJECT':
             valid = (subject not in self.subjects or date not in self.projects.data[subject])
         else:
-            print("FATAL ERROR: CHECK_EVENT_MARK")
+            print("ERROR: no existe la asignatura" + subject + "especificada")
             return False
         if valid:
-            print("Error: No existe el " + tipo + " especificado")
+            print("ERROR: No existe el " + tipo + " especificado")
             return False
         event = db.search_event(self.user_name, subject, date, tipo).pop()
         nota, nonce_nota = event[-2], event[-1]
@@ -157,7 +156,7 @@ class User:
         db = DataBase()
         project_list = db.projects_from_subject(self.user_name, subject)
         if date in project_list:
-            print("Ese proyecto ya está registrado!!")
+            print("add_project: ese projecto ya está registrado")
             return False
         else:
             mark, nonce_mark = cifrado.cifrado_autenticado(str(mark), self.key)
@@ -178,7 +177,7 @@ class User:
         project_list = db.projects_from_subject(self.user_name, subject)
         if date not in project_list:
             return False
-        print("DROP_PROJECT: projecto eliminado")
+        print("drop_project: proyecto eliminado")
         db.delete_event(self.user_name, subject, date, 'PROJECT')
         return True
 

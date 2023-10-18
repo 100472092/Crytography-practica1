@@ -116,7 +116,6 @@ class App:
             self.password_tries = 3
             self.change_to_user_functionality(frame)
             return
-        print(self.password_tries)
         if self.password_tries == 1:
             print("warning_message: fallos por numero de intentos")
             self.error_stream.config(text="Si fallas una vez más\nla aplicación se bloqueará 5 segundos")
