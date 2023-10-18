@@ -955,6 +955,8 @@ class App:
         tittle.pack()
         body.pack()
         data_label.pack(ipadx=10)
+        exit_button = Button(main_frame, text="Salir", command=lambda: self.change_to_user_functionality(main_frame));
+        exit_button.pack()
 
 
     # == FUNCIONES AUXILIARES PARA BOTONES ==
