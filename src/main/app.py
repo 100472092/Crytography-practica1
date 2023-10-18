@@ -73,6 +73,7 @@ class App:
         except ValueError:
             return False, "La edad debe ser un número"
         return True, ""
+
     def validate_subject(self, subject, ev_existence=False):
         if len(subject) <= 0:
             return False, "campo de asignatura vacío"
@@ -954,9 +955,8 @@ class App:
         tittle.pack()
         body.pack()
         data_label.pack(ipadx=10)
-        exit_button = Button(main_frame, text="Salir", command=lambda: self.change_to_user_functionality(main_frame));
+        exit_button = Button(main_frame, text="Salir", command=lambda: self.change_to_user_functionality(main_frame))
         exit_button.pack()
-
 
     # == FUNCIONES AUXILIARES PARA BOTONES ==
     def apply_selection_exam(self, subject, date, channel, old_subject_box, old_date_box, old_mark_box):
