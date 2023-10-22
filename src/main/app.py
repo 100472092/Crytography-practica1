@@ -170,7 +170,7 @@ class App:
     def app_modify_exam(self, old_subject, old_date, new_subject, new_date, mark, channel, exams):
         channel.config(text="")
         if self.allow_mod:
-            valid_s, err_msg = self.validate_subject(new_subject, False)
+            valid_s, err_msg = self.validate_subject(new_subject, True)
             if not valid_s:
                 channel.config(text=err_msg, fg="red")
                 return
@@ -256,7 +256,7 @@ class App:
     def app_modify_project(self, old_subject, old_date, new_subject, new_date, mark, channel, projects):
         channel.config(text="")
         if self.allow_mod:
-            valid_s, err_msg = self.validate_subject(new_subject, False)
+            valid_s, err_msg = self.validate_subject(new_subject, True)
             if not valid_s:
                 channel.config(text=err_msg, fg="red")
                 return
@@ -975,7 +975,10 @@ class App:
         old_mark_box.delete(0, END)
         old_subject_box.insert(0, subject)
         old_date_box.insert(0, date)
-        old_mark_box.insert(0, self.curr_user.check_event_mark(subject, date, 'EXAM'))
+        mark = self.curr_user.check_event_mark(subject, date, 'EXAM')
+        if mark == -1:
+            mark = "sin nota..."
+        old_mark_box.insert(0, str(mark))
         old_subject_box.config(state=DISABLED)
         old_date_box.config(state=DISABLED)
         old_mark_box.config(state=DISABLED)
@@ -996,7 +999,10 @@ class App:
         old_mark_box.delete(0, END)
         old_subject_box.insert(0, subject)
         old_date_box.insert(0, date)
-        old_mark_box.insert(0, self.curr_user.check_event_mark(subject, date, 'PROJECT'))
+        mark = self.curr_user.check_event_mark(subject, date, 'PROJECT')
+        if mark == -1:
+            mark = "sin nota..."
+        old_mark_box.insert(0, str(mark))
         old_subject_box.config(state=DISABLED)
         old_date_box.config(state=DISABLED)
         old_mark_box.config(state=DISABLED)
