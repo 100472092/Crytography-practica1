@@ -956,9 +956,16 @@ class App:
         body.pack()
         data_label.pack(ipadx=10)
         exit_button = Button(main_frame, text="Salir", command=lambda: self.change_to_user_functionality(main_frame))
+        download = Button(main_frame, text="Descargar certificado de notas", command=lambda: self.marks_certification())
+        download.pack()
         exit_button.pack()
 
     # == FUNCIONES AUXILIARES PARA BOTONES ==
+
+    def marks_certification(self):
+        self.curr_user.gen_data()
+        return
+
     def apply_selection_exam(self, subject, date, channel, old_subject_box, old_date_box, old_mark_box):
         valid_s, err_msg = self.validate_date_existence(date, subject, 'EXAM')
         if not valid_s:

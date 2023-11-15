@@ -1,25 +1,7 @@
 """this class encapsules user funtionality"""
 from data_base_gestor import DataBase
 import cifrado
-import base64
-
-
-class MyDict:
-    def __init__(self, data, tipo):
-        self.data: dict = data
-        self.tipo = tipo
-
-    def __str__(self):
-        out = ""
-        for i in self.data:
-            exams_i = self.data[i]
-            if len(exams_i) < 1:
-                exams_i = "sin " + self.tipo + " registrados..."
-            out += i + ": " + str(exams_i) + "\n"
-        return out
-
-    def list(self):
-        return self.data.items()
+import os
 
 
 def register_user(user_name: str, password: str, universidad: str, edad: str):
@@ -61,7 +43,7 @@ class User:
         dict_out = dict()
         for i in db.subjects_from_user(self.user_name):
             dict_out[i] = db.exams_from_subject(self.user_name, i)
-        return MyDict(dict_out, "exámenes")
+        return MyDict(dict_out, "EXAM")
 
     @property
     def projects(self):
@@ -69,7 +51,7 @@ class User:
         dict_out = dict()
         for i in db.subjects_from_user(self.user_name):
             dict_out[i] = db.projects_from_subject(self.user_name, i)
-        return MyDict(dict_out, "proyectos")
+        return MyDict(dict_out, "PROJECT")
 
     @property
     def subjects(self):
@@ -188,6 +170,65 @@ class User:
                 len(self.projects.data[s])) + " proyecto(s)\n"
         return out
 
+    def gen_data(self):
+        print("Generando fichero...")
+        if not os.path.exists(os.path.dirname(__file__)[:-4] + "/certifications"):
+            print("Creando directorio...")
+            os.makedirs(os.path.dirname(__file__)[:-4] + "/certifications", mode=0o777, exist_ok=True)
+        cerf_name = os.path.dirname(__file__)[:-4] + "/certifications/" + self.user_name + "_cerf"
+        subjects = self.subjects
+        examns = self.exams
+        projects = self.projects
+        data = self.get_user_data()
+
+        file = os.open(cerf_name, os.O_CREAT | os.O_RDWR | os.O_TRUNC)
+        os.write(file, bytes("Nombre: " + self.user_name + "\n", 'utf-8'))
+        os.write(file, bytes("Edad: " + data[2] + "\n", 'utf-8'))
+        os.write(file, bytes("Universidad: " + data[1] + "\n", 'utf-8'))
+        os.write(file, bytes("----------------------\n", 'utf-8'))
+        os.write(file, bytes("Asignaturas: " + subjects.__str__() + "\n", 'utf-8'))
+        os.write(file, bytes("Exámenes:\n", 'utf-8'))
+        os.write(file, bytes(examns.str_marks(self) + "\n", 'utf-8'))
+        os.write(file, bytes("Proyectos:\n", 'utf-8'))
+        os.write(file, bytes(projects.str_marks(self) + "\n", 'utf-8'))
+        os.close(file)
+
+
+class MyDict:
+    def __init__(self, data, tipo):
+        self.data: dict = data
+        self.tipo = tipo
+
+    def __str__(self):
+        out = ""
+        for i in self.data:
+            exams_i = self.data[i]
+            if len(exams_i) < 1:
+                if self.tipo == "EXAM":
+                    event = "exámenes"
+                else:
+                    event = "proyectos"
+                exams_i = "sin " + event + " registrados..."
+            out += i + ": " + str(exams_i) + "\n"
+        return out
+    def str_marks(self, user: User):
+        out = ""
+        for i in self.data:
+            exams_i = self.data[i]
+            out += "\t" + i + ": "
+            if len(exams_i) < 1:
+                if self.tipo == "EXAM":
+                    event = "exámenes"
+                else:
+                    event = "proyectos"
+                out += "sin " + event + " registrados..."
+            for j in exams_i:
+                mark = user.check_event_mark(i, j, self.tipo)
+                if mark < 0:
+                    mark = "sin nota registrada"
+                out += "\n\t\t" + j + ": " + str(mark)
+            out += "\n"
+        return out
 
 if __name__ == '__main__':
     pass
