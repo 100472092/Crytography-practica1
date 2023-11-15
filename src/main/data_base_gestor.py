@@ -79,8 +79,9 @@ class DataBase:
 
         def update_user_creds(self, user_name: str, new_token: str, new_salt:str):
             self.open()
-            sql = "UPDATE USER_CREDS SET PASSWORD=?, SALT_PW=? FROM (SELECT USER_NAME, PASSWORD, SALT_PW FROM USER_CREDS WHERE USER_NAME=?)"
+            sql = "UPDATE USER_CREDS SET PASSWORD=?, SALT_PW=? WHERE USER_NAME=?"
             self.base.execute(sql, (new_token, new_salt, user_name))
+            self.base.commit()
             self.close()
 
         def search_subject(self, user: str, subject: str):
