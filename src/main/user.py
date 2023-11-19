@@ -2,6 +2,7 @@
 from data_base_gestor import DataBase
 import cifrado
 import os
+import firma
 
 UTF8 = 'utf-8'
 
@@ -192,6 +193,11 @@ class User:
         file = os.open(cerf_name, os.O_CREAT | os.O_RDWR | os.O_TRUNC)
         os.write(file, bytes(data, UTF8))
         os.close(file)
+
+        firma.firmar_fichero(cerf_name)
+
+        firma.verifica_fichero(cerf_name)
+
 
 class MyDict:
     def __init__(self, data, tipo):
