@@ -181,7 +181,7 @@ class User:
         if not os.path.exists(os.path.dirname(__file__)[:-4] + "/certifications"):
             print("Creando directorio...")
             os.makedirs(os.path.dirname(__file__)[:-4] + "/certifications", mode=0o777, exist_ok=True)
-        cerf_name = os.path.dirname(__file__)[:-4] + "/certifications/" + self.user_name + "_cerf"
+        cerf_name = os.path.dirname(__file__)[:-4] + "/certifications/" + self.user_name + "_notas"
         subjects = self.subjects
         examns = self.exams
         projects = self.projects
