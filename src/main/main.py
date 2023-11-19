@@ -1,21 +1,28 @@
 import os
+
+import firma
 from data_base_gestor import DataBase
 from app import App
 
 
+DIR_PATH = os.path.dirname(__file__)[:-4]
+
 def main():
-    # Sino existe, inicializa la base de datos
-    if not os.path.exists(os.path.dirname(__file__)[:-4] + "storage/database.db"):
+    # Si no existe, inicializa la base de datos
+    if not os.path.exists(DIR_PATH + "storage/database.db"):
         print("Creando base de datos...")
-        os.makedirs(os.path.dirname(__file__)[:-4] + "storage", mode=0o777, exist_ok=True)
+        os.makedirs(DIR_PATH + "storage", mode=0o777, exist_ok=True)
         DataBase().initialize()
+    
+    # Si no existen claves para el sistema se generan
+    if not os.path.exists(DIR_PATH + "keys/private.pem"):
+        print("Generando claves...")
+        os.makedirs(DIR_PATH + "keys", mode=0o777, exist_ok=True)
+        firma.generar_claves(DIR_PATH + "/keys/")
 
     # funcionalidad de la interfaz gráfica
     App()
 
-
-# Press the green button in the gutter to run the script.
 if __name__ == '__main__':
     main()
 
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/

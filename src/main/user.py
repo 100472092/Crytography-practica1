@@ -3,6 +3,8 @@ from data_base_gestor import DataBase
 import cifrado
 import os
 
+UTF8 = 'utf-8'
+
 
 def register_user(user_name: str, password: str, universidad: str, edad: str):
     db = DataBase()
@@ -182,15 +184,15 @@ class User:
         data = self.get_user_data()
 
         file = os.open(cerf_name, os.O_CREAT | os.O_RDWR | os.O_TRUNC)
-        os.write(file, bytes("Nombre: " + self.user_name + "\n", 'utf-8'))
-        os.write(file, bytes("Edad: " + data[2] + "\n", 'utf-8'))
-        os.write(file, bytes("Universidad: " + data[1] + "\n", 'utf-8'))
+        os.write(file, bytes("Nombre: " + self.user_name + "\n", UTF8))
+        os.write(file, bytes("Edad: " + data[2] + "\n", UTF8))
+        os.write(file, bytes("Universidad: " + data[1] + "\n", UTF8))
         os.write(file, bytes("----------------------\n", 'utf-8'))
-        os.write(file, bytes("Asignaturas: " + subjects.__str__() + "\n", 'utf-8'))
-        os.write(file, bytes("Exámenes:\n", 'utf-8'))
-        os.write(file, bytes(examns.str_marks(self) + "\n", 'utf-8'))
+        os.write(file, bytes("Asignaturas: " + subjects.__str__() + "\n", UTF8))
+        os.write(file, bytes("Exámenes:\n", UTF8))
+        os.write(file, bytes(examns.str_marks(self) + "\n", UTF8))
         os.write(file, bytes("Proyectos:\n", 'utf-8'))
-        os.write(file, bytes(projects.str_marks(self) + "\n", 'utf-8'))
+        os.write(file, bytes(projects.str_marks(self) + "\n", UTF8))
         os.close(file)
 
 
