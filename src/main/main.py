@@ -18,7 +18,7 @@ def main():
     if not os.path.exists(DIR_PATH + "keys/private.pem"):
         print("Generando claves...")
         os.makedirs(DIR_PATH + "keys", mode=0o777, exist_ok=True)
-        firma.generar_claves(DIR_PATH + "/keys/")
+        #firma.generar_claves(DIR_PATH + "/keys/")
 
     # funcionalidad de la interfaz gráfica
     App()

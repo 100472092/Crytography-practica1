@@ -61,6 +61,12 @@ class User:
         out = db.subjects_from_user(self.user_name)
         return out
 
+    def __gen_marks_cerf_str(self, user_name, user_data, subjects, exams, projects):
+        user = "Nombre: " + user_name + "\nEdad: " + user_data[2] + "\nUniversidad: " + user_data[1] + "\n"
+        separador = "----------------------\n"
+        marks = "Asignaturas: " + subjects + "\n" + "Exámenes:\n" + exams + "\nProyectos:\n" + projects + "\n"
+        return user + separador + marks
+
     def get_user_data(self):
         db = DataBase()
         data = db.get_user_data(self.user_name)
@@ -88,8 +94,6 @@ class User:
         print("drop_subject: ASIGNATURA ELIMINADA")
         db.delete_subject_from_user(self.user_name, subject)
         return True
-
-    # TODO: generalizar selección de asignatura y examen
 
     def add_exam(self, subject: str, date: str, nota: int = -1):
         db = DataBase()
@@ -181,20 +185,13 @@ class User:
         subjects = self.subjects
         examns = self.exams
         projects = self.projects
-        data = self.get_user_data()
+        user_data = self.get_user_data()
+
+        data = self.__gen_marks_cerf_str(self.user_name, user_data, subjects.__str__(), examns.str_marks(self), projects.str_marks(self))
 
         file = os.open(cerf_name, os.O_CREAT | os.O_RDWR | os.O_TRUNC)
-        os.write(file, bytes("Nombre: " + self.user_name + "\n", UTF8))
-        os.write(file, bytes("Edad: " + data[2] + "\n", UTF8))
-        os.write(file, bytes("Universidad: " + data[1] + "\n", UTF8))
-        os.write(file, bytes("----------------------\n", 'utf-8'))
-        os.write(file, bytes("Asignaturas: " + subjects.__str__() + "\n", UTF8))
-        os.write(file, bytes("Exámenes:\n", UTF8))
-        os.write(file, bytes(examns.str_marks(self) + "\n", UTF8))
-        os.write(file, bytes("Proyectos:\n", 'utf-8'))
-        os.write(file, bytes(projects.str_marks(self) + "\n", UTF8))
+        os.write(file, bytes(data, UTF8))
         os.close(file)
-
 
 class MyDict:
     def __init__(self, data, tipo):
