@@ -179,10 +179,10 @@ class User:
 
     def gen_data(self):
         print("Generando fichero...")
-        if not os.path.exists(os.path.dirname(__file__)[:-4] + "/certifications"):
+        if not os.path.exists(os.path.dirname(__file__)[:-4] + "/fihceros_notas"):
             print("Creando directorio...")
-            os.makedirs(os.path.dirname(__file__)[:-4] + "/certifications", mode=0o777, exist_ok=True)
-        cerf_name = os.path.dirname(__file__)[:-4] + "/certifications/" + self.user_name + "_notas"
+            os.makedirs(os.path.dirname(__file__)[:-4] + "/ficheros_notas", mode=0o777, exist_ok=True)
+        cerf_name = os.path.dirname(__file__)[:-4] + "/ficheros_notas/" + self.user_name + "_notas"
         subjects = self.subjects
         examns = self.exams
         projects = self.projects
