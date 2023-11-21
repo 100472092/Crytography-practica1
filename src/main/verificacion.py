@@ -1,14 +1,17 @@
+import os.path
+
 import cryptography.exceptions
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import padding
 from cryptography import x509
 
+PATH = os.path.dirname(__file__)[:-8]
 
 def verify_all(path):
-    AC1_cert = abrir_certificado("../../OpenSSL/AC1/ac1cert.pem")
+    AC1_cert = abrir_certificado(PATH + "OpenSSL/AC1/ac1cert.pem")
     if AC1_cert == -1:
         return -1
-    A_cert = abrir_certificado("../../OpenSSL/A/Acert.pem")
+    A_cert = abrir_certificado(PATH + "OpenSSL/A/Acert.pem")
     if A_cert == -1:
         return -1
 
