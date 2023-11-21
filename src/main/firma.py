@@ -101,5 +101,5 @@ def create_csr(private_key):
         critical=False,
     ).sign(private_key, hashes.SHA256())
 
-    with open("../certifications/A_csr.pem", "xb") as f:
+    with open("../../OpenSSL/AC1/solicitudes/A_csr.pem", "wb") as f:
         f.write(csr.public_bytes(serialization.Encoding.PEM))
