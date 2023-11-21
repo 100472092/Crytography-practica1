@@ -88,27 +88,6 @@ def sign_data(private_key, path):
     os.write(fichero_firma, signature)
     os.close(fichero_firma)
 
-def verify_signature(public_key, path):
-    with open(path + ".sig", "rb") as signature_file:
-        signature = signature_file.read()
-    with open(path, "rb") as message_file:
-        message = message_file.read()
-    try:
-        public_key.verify(
-        signature,
-        message,
-        padding.PSS(
-            mgf=padding.MGF1(hashes.SHA256()),
-            salt_length=padding.PSS.MAX_LENGTH
-        ),
-        hashes.SHA256()
-        )
-        print("Firma correcta! Fichero es válido")
-        return 0
-    except cryptography.exceptions.InvalidSignature:
-        print("La firma no es correcta")
-        return -1
-
 
 def create_csr(private_key):
     csr = x509.CertificateSigningRequestBuilder().subject_name(x509.Name([
@@ -122,5 +101,5 @@ def create_csr(private_key):
         critical=False,
     ).sign(private_key, hashes.SHA256())
 
-    with open("../certifications/A_csr.pem", "wb") as f:
+    with open("../certifications/A_csr.pem", "xb") as f:
         f.write(csr.public_bytes(serialization.Encoding.PEM))

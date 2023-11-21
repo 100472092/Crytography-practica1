@@ -3,6 +3,7 @@ from data_base_gestor import DataBase
 import cifrado
 import os
 import firma
+import verificacion
 
 UTF8 = 'utf-8'
 
@@ -196,7 +197,7 @@ class User:
 
         firma.firmar_fichero(cerf_name)
 
-        firma.verifica_fichero(cerf_name)
+        verificacion.verify_all(cerf_name)
 
 
 class MyDict:
