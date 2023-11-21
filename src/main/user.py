@@ -201,7 +201,7 @@ class User:
         shutil.copy(PATH + "OpenSSL/AC1/ac1cert.pem", os.path.dirname(__file__)[:-4] + "/" + self.user_name + "_datos/")
         shutil.copy(PATH + "OpenSSL/A/Acert.pem", os.path.dirname(__file__)[:-4] + "/" + self.user_name + "_datos/")
 
-        verificacion.verify_all(cerf_name)
+        # verificacion.verify_all(cerf_name, cerf_name[:-4] + ".sig")
 
 
 class MyDict:

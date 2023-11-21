@@ -77,8 +77,7 @@ def sign_data(private_key, path):
         ),
         hashes.SHA256()
     )
-
-    fichero_firma = os.open(path + ".sig", os.O_CREAT | os.O_RDWR | os.O_TRUNC)
+    fichero_firma = os.open(path[:-4] + ".sig", os.O_CREAT | os.O_RDWR | os.O_TRUNC)
     os.write(fichero_firma, signature)
     os.close(fichero_firma)
 

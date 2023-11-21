@@ -7,7 +7,7 @@ from cryptography import x509
 
 PATH = os.path.dirname(__file__)[:-8]
 
-def verify_all(path):
+def verify_all(path_fichero, path_firma):
     AC1_cert = abrir_certificado(PATH + "OpenSSL/AC1/ac1cert.pem")
     if AC1_cert == -1:
         return -1
@@ -21,7 +21,7 @@ def verify_all(path):
     if verify_certificate(public_key_autoridad, AC1_cert) == -1:
         return -1
     public_key_sistema = A_cert.public_key()
-    if verify_signature(public_key_sistema, path) == -1:
+    if verify_signature(public_key_sistema, path_firma, path_fichero) == -1:
         return -1
 
 
@@ -40,10 +40,10 @@ def verify_certificate(clave_autoridad, cert):
         return -1
 
 
-def verify_signature(public_key, path):
-    with open(path + ".sig", "rb") as signature_file:
+def verify_signature(public_key, path_firma, path_archivo):
+    with open(path_firma, "rb") as signature_file:
         signature = signature_file.read()
-    with open(path, "rb") as message_file:
+    with open(path_archivo, "rb") as message_file:
         message = message_file.read()
     try:
         public_key.verify(
