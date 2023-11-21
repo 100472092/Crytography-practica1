@@ -13,7 +13,6 @@ def main():
         print("Creando base de datos...")
         os.makedirs(DIR_PATH + "storage", mode=0o777, exist_ok=True)
         DataBase().initialize()
-
     # Si no existen claves para el sistema se generan
     if not os.path.exists(DIR_PATH + "keys/private.pem"):
         print("Generando claves...")
@@ -23,6 +22,7 @@ def main():
         print("Generando clave publica...")
         os.makedirs(DIR_PATH + "keys", mode=0o777, exist_ok=True)
         firma.gen_public(DIR_PATH + "/keys/")
+
 
     # funcionalidad de la interfaz gráfica
     App()

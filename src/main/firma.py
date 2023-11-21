@@ -5,6 +5,8 @@ from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import padding
+from cryptography import x509
+from cryptography.x509.oid import NameOID
 
 DIR_PATH = os.path.dirname(__file__)[:-4]
 
@@ -12,10 +14,12 @@ def generar_claves(path):
     private_key = generate_private()
     save_private_key(private_key, path)
     save_public_key(private_key, path)
+    create_csr(private_key)
 
 def gen_public(path):
     private_key = read_private_key(path)
     save_public_key(private_key, path)
+    create_csr(private_key)
 
 def generate_private():
     private_key = rsa.generate_private_key(
@@ -106,3 +110,17 @@ def verify_signature(public_key, path):
         return -1
 
 
+def create_csr(private_key):
+    csr = x509.CertificateSigningRequestBuilder().subject_name(x509.Name([
+    x509.NameAttribute(NameOID.COUNTRY_NAME, "ES"),
+    x509.NameAttribute(NameOID.STATE_OR_PROVINCE_NAME, "MADRID"),
+    x509.NameAttribute(NameOID.LOCALITY_NAME, "LEGANES"),
+    x509.NameAttribute(NameOID.ORGANIZATION_NAME, "UC3M"),
+    x509.NameAttribute(NameOID.COMMON_NAME, "72092"),
+    ])).add_extension(
+        x509.SubjectAlternativeName([]),
+        critical=False,
+    ).sign(private_key, hashes.SHA256())
+
+    with open("../certifications/A_csr.pem", "wb") as f:
+        f.write(csr.public_bytes(serialization.Encoding.PEM))
