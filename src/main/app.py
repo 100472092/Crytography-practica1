@@ -297,6 +297,25 @@ class App:
             channel.config(text="Projecto eliminado", fg='green')
             projects.config(text=self.curr_user.projects.__str__())
 
+    def app_verify_all(self, m_file, s_file):
+        err_code = verificacion.verify_all(m_file, s_file)
+        self.error_stream_restore()
+        match err_code:
+            case -1:
+                self.error_stream.config(text="Certificado AC1 defectuoso o modificado", fg="red")
+            case -2:
+                self.error_stream.config(text="Certificado de sistema defectuoso o modificado", fg="red")
+            case -3:
+                self.error_stream.config(text="Certificado de sistema no válido", fg="red")
+            case -4:
+                self.error_stream.config(text="Certificado de AC1 no válido", fg="red")
+            case -5:
+                self.error_stream.config(text="Firma no válida", fg="red")
+            case _:
+                self.error_stream.config(text="Certificado y firma validada", fg="green")
+
+
+
     # == TRANSICIONES ==
     def change_to_log_in(self, frame):
         frame.destroy()
@@ -976,7 +995,7 @@ class App:
                            command=lambda: self.m_browser(s_file, ("Sign file", ".sig")))
 
         validate_button = Button(validate_fm, text="Validate",
-                                 command=lambda: verificacion.verify_all(m_file.get(), s_file.get()))
+                                 command=lambda: self.app_verify_all(m_file.get(), s_file.get()))
         validate_title.grid(row=0, column=0, columnspan=2)
         message.grid(row=1, column=0, pady=5)
         sign.grid(row=3, column=0, pady=5)
