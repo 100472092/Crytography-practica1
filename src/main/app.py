@@ -7,13 +7,14 @@ import os
 
 import user
 import constantes
+import verificacion
 
 PATH = os.path.dirname(__file__)[:-8]
-
 
 TITTLE_SIZE = constantes.TITTLE_SIZE
 SUBTITLE_SIZE = constantes.SUBTITLE_SIZE
 ERR_MSG_SIZE = constantes.ERR_MSG_SIZE
+
 
 class App:
     curr_user = None
@@ -962,34 +963,40 @@ class App:
         exit_button = Button(main_frame, text="Salir", command=lambda: self.change_to_user_functionality(main_frame))
         download = Button(main_frame, text="Descargar certificado de notas", command=lambda: self.marks_certification())
         download.pack()
-        exit_button.pack()
         validate_fm = Frame(main_frame, borderwidth=constantes.FRAME_BORDERWIDTH, relief='groove')
         validate_fm.pack()
-        validate_title = Label(validate_fm, text="Valida tus notas", font=(constantes.TITTLE_FONT, TITTLE_SIZE))
+        validate_title = Label(validate_fm, text="Valida tus notas", font=(constantes.TITTLE_FONT, SUBTITLE_SIZE))
         message = Label(validate_fm, text="Mensaje")
         sign = Label(validate_fm, text="Firma")
-        s_file = Entry(validate_fm, state=DISABLED)
-        m_file = Entry(validate_fm, state=DISABLED)
-        m_explore = Button(validate_fm, text="Select marks file", command=lambda: self.m_browser(m_file, ("Marks file", ".txt")))
-        s_explore = Button(validate_fm, text="Select sign file", command=lambda: self.m_browser(s_file, ("Sign file", ".pem")))
-        validate
-        message.grid(row=0, column=0)
-        sign.grid(row=2, column=0)
-        m_file.grid(row=0, column=1)
-        s_file.grid(row=2, column=1)
-        m_explore.grid(row=1, column=0, columnspan=2)
-        s_explore.grid(row=3, column=0, columnspan=2)
+        s_file = Entry(validate_fm, state=DISABLED, width=40)
+        m_file = Entry(validate_fm, state=DISABLED, width=40)
+        m_explore = Button(validate_fm, text="Select marks file",
+                           command=lambda: self.m_browser(m_file, ("Marks file", ".txt")))
+        s_explore = Button(validate_fm, text="Select sign file",
+                           command=lambda: self.m_browser(s_file, ("Sign file", ".sig")))
+
+        validate_button = Button(validate_fm, text="Validate",
+                                 command=lambda: verificacion.verify_all(m_file.get(), s_file.get()))
+        validate_title.grid(row=0, column=0, columnspan=2)
+        message.grid(row=1, column=0, pady=5)
+        sign.grid(row=3, column=0, pady=5)
+        m_file.grid(row=1, column=1, pady=5, padx=5)
+        s_file.grid(row=3, column=1, pady=5, padx=5)
+        m_explore.grid(row=2, column=0, columnspan=2, pady=5)
+        s_explore.grid(row=4, column=0, columnspan=2, pady=5)
+        validate_button.grid(row=5, column=0, columnspan=2, pady=5)
+
+        exit_button.pack()
+
 
     def m_browser(self, box, looking_for):
-        m_filename = filedialog.askopenfilename(initialdir=PATH + "src/" + self.curr_user.user_name + "_datos/", title="select file", filetypes=(looking_for, ("All files", ".")))
+        m_filename = filedialog.askopenfilename(initialdir=PATH + "src/" + self.curr_user.user_name + "_datos/",
+                                                title="select file", filetypes=(looking_for, ("All files", "")))
         box.config(state='normal')
         box.delete(0, END)
         box.insert(0, m_filename)
         box.config(state=DISABLED)
-        print(m_filename)
-
-
-
+        print("selected file: ", m_filename)
 
     # == FUNCIONES AUXILIARES PARA BOTONES ==
 
