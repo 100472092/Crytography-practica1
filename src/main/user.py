@@ -3,8 +3,9 @@ from data_base_gestor import DataBase
 import cifrado
 import os
 import firma
-import verificacion
+
 import shutil
+
 
 UTF8 = 'utf-8'
 PATH = os.path.dirname(__file__)[:-8]
@@ -81,7 +82,6 @@ class User:
     def add_subject(self, new_subject):
         db = DataBase()
         new_subject = new_subject.lower()
-        # TODO: Añadir salida
         if db.search_subject(self.user_name, new_subject):
             print("add_subject: Asignatura ya existente!")
             return False
