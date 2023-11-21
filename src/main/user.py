@@ -4,6 +4,7 @@ import cifrado
 import os
 import firma
 import verificacion
+import shutil
 
 UTF8 = 'utf-8'
 
@@ -180,10 +181,10 @@ class User:
 
     def gen_data(self):
         print("Generando fichero...")
-        if not os.path.exists(os.path.dirname(__file__)[:-4] + "/fihceros_notas"):
+        if not os.path.exists(os.path.dirname(__file__)[:-4] + "/" + self.user_name + "_datos"):
             print("Creando directorio...")
-            os.makedirs(os.path.dirname(__file__)[:-4] + "/ficheros_notas", mode=0o777, exist_ok=True)
-        cerf_name = os.path.dirname(__file__)[:-4] + "/ficheros_notas/" + self.user_name + "_notas"
+            os.makedirs(os.path.dirname(__file__)[:-4] + "/" + self.user_name + "_datos/", mode=0o777, exist_ok=True)
+        cerf_name = os.path.dirname(__file__)[:-4] + "/" + self.user_name + "_datos/" + self.user_name + "_notas"
         subjects = self.subjects
         examns = self.exams
         projects = self.projects
@@ -196,6 +197,8 @@ class User:
         os.close(file)
 
         firma.firmar_fichero(cerf_name)
+        shutil.copy("../../OpenSSL/AC1/ac1cert.pem", os.path.dirname(__file__)[:-4] + "/" + self.user_name + "_datos/")
+        shutil.copy("../../OpenSSL/A/Acert.pem", os.path.dirname(__file__)[:-4] + "/" + self.user_name + "_datos/")
 
         verificacion.verify_all(cerf_name)
 

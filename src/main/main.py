@@ -13,11 +13,12 @@ def main():
         print("Creando base de datos...")
         os.makedirs(DIR_PATH + "storage", mode=0o777, exist_ok=True)
         DataBase().initialize()
-    # Si no existen claves para el sistema se generan
+    # Si no existen claves para el sistema se generan, además del csr correspondiente
     if not os.path.exists(DIR_PATH + "keys/private.pem"):
         print("Generando claves...")
         os.makedirs(DIR_PATH + "keys", mode=0o777, exist_ok=True)
         firma.generar_claves(DIR_PATH + "/keys/")
+    # Si no existe la clave pública, se recalcula a partir de la privada y se genera un csr
     if not os.path.exists(DIR_PATH + "keys/public.pem"):
         print("Generando clave publica...")
         os.makedirs(DIR_PATH + "keys", mode=0o777, exist_ok=True)

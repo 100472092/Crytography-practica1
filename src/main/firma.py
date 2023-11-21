@@ -1,6 +1,5 @@
 import os
 
-import cryptography.exceptions
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives import hashes
@@ -31,11 +30,6 @@ def generate_private():
 def firmar_fichero(path):
     private_key = read_private_key(DIR_PATH + "keys/")
     sign_data(private_key, path)
-
-def verifica_fichero(file_name):
-    #TODO esto hay que cambiarlo a un cert.public_key o algo así de openssl
-    public_key = read_private_key(DIR_PATH + "keys/").public_key()
-    verify_signature(public_key, file_name)
 
 def read_private_key(path):
     password = bytes(os.environ["key"], "ascii")
