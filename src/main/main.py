@@ -4,7 +4,7 @@ import firma
 from data_base_gestor import DataBase
 from app import App
 
-os.environ["key"] = "$4lCH1tX45"
+os.environ["key"] = input("variable de entorno: ")
 DIR_PATH = os.path.dirname(__file__)[:-4]
 
 def main():

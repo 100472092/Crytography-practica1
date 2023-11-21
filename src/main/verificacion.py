@@ -6,9 +6,12 @@ from cryptography import x509
 
 def verify_all(path):
     AC1_cert = abrir_certificado("../../OpenSSL/AC1/ac1cert.pem")
-    if AC1_cert == -1: return -1
+    if AC1_cert == -1:
+        return -1
     A_cert = abrir_certificado("../../OpenSSL/A/Acert.pem")
-    if A_cert == -1: return -1
+    if A_cert == -1:
+        return -1
+
     public_key_autoridad = AC1_cert.public_key()
     if verify_certificate(public_key_autoridad, A_cert) == -1:
         return -1
