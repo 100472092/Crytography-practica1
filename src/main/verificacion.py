@@ -13,16 +13,16 @@ def verify_all(path_fichero, path_firma):
         return -1
     A_cert = abrir_certificado(PATH + "OpenSSL/A/Acert.pem")
     if A_cert == -1:
-        return -1
+        return -2
 
     public_key_autoridad = AC1_cert.public_key()
     if verify_certificate(public_key_autoridad, A_cert) == -1:
-        return -1
+        return -3
     if verify_certificate(public_key_autoridad, AC1_cert) == -1:
-        return -1
+        return -4
     public_key_sistema = A_cert.public_key()
     if verify_signature(public_key_sistema, path_firma, path_fichero) == -1:
-        return -1
+        return -5
 
 
 def verify_certificate(clave_autoridad, cert):
