@@ -7,11 +7,12 @@ from cryptography import x509
 
 PATH = os.path.dirname(__file__)[:-8]
 
-def verify_all(path_fichero, path_firma):
-    AC1_cert = abrir_certificado(PATH + "OpenSSL/AC1/ac1cert.pem")
+
+def verify_all(path_fichero, path_firma, root_cert, sys_cert):
+    AC1_cert = abrir_certificado(root_cert)
     if AC1_cert == -1:
         return -1
-    A_cert = abrir_certificado(PATH + "OpenSSL/A/Acert.pem")
+    A_cert = abrir_certificado(sys_cert)
     if A_cert == -1:
         return -2
 

@@ -297,8 +297,11 @@ class App:
             channel.config(text="Projecto eliminado", fg='green')
             projects.config(text=self.curr_user.projects.__str__())
 
-    def app_verify_all(self, m_file, s_file):
-        err_code = verificacion.verify_all(m_file, s_file)
+    def app_verify_all(self, m_file, s_file, chain_cert, sys_cert):
+        if len(m_file)*len(s_file)*len(chain_cert)*len(sys_cert) == 0:
+            self.error_stream.config(text="Campo vacío", fg="red")
+            return -1
+        err_code = verificacion.verify_all(m_file, s_file, chain_cert, sys_cert)
         self.error_stream_restore()
         match err_code:
             case -1:
@@ -313,8 +316,6 @@ class App:
                 self.error_stream.config(text="Firma no válida", fg="red")
             case _:
                 self.error_stream.config(text="Certificado y firma validada", fg="green")
-
-
 
     # == TRANSICIONES ==
     def change_to_log_in(self, frame):
@@ -987,15 +988,24 @@ class App:
         validate_title = Label(validate_fm, text="Valida tus notas", font=(constantes.TITTLE_FONT, SUBTITLE_SIZE))
         message = Label(validate_fm, text="Mensaje")
         sign = Label(validate_fm, text="Firma")
+        ac1 = Label(validate_fm, text="AC1cert")
+        a = Label(validate_fm, text="Acert")
         s_file = Entry(validate_fm, state=DISABLED, width=40)
         m_file = Entry(validate_fm, state=DISABLED, width=40)
+        a1cert = Entry(validate_fm, state=DISABLED, width=40)
+        acert = Entry(validate_fm, state=DISABLED, width=40)
         m_explore = Button(validate_fm, text="Select marks file",
                            command=lambda: self.m_browser(m_file, ("Marks file", ".txt")))
         s_explore = Button(validate_fm, text="Select sign file",
                            command=lambda: self.m_browser(s_file, ("Sign file", ".sig")))
+        ac1_explore = Button(validate_fm, text="Select certchain file",
+                             command=lambda: self.m_browser(a1cert, ("Concat certificate", ".pem")))
+        a_explore = Button(validate_fm, text="Select cert file",
+                           command=lambda: self.m_browser(acert, ("system certificate", ".pem")))
 
         validate_button = Button(validate_fm, text="Validate",
-                                 command=lambda: self.app_verify_all(m_file.get(), s_file.get()))
+                                 command=lambda: self.app_verify_all(m_file.get(), s_file.get(), a1cert.get(),
+                                                                     acert.get()))
         validate_title.grid(row=0, column=0, columnspan=2)
         message.grid(row=1, column=0, pady=5)
         sign.grid(row=3, column=0, pady=5)
@@ -1003,14 +1013,20 @@ class App:
         s_file.grid(row=3, column=1, pady=5, padx=5)
         m_explore.grid(row=2, column=0, columnspan=2, pady=5)
         s_explore.grid(row=4, column=0, columnspan=2, pady=5)
-        validate_button.grid(row=5, column=0, columnspan=2, pady=5)
+        ac1.grid(row=5, column=0, pady=5)
+        a1cert.grid(row=5, column=1, pady=5)
+        ac1_explore.grid(row=6,column=0, columnspan=2, pady=5)
+        a.grid(row=7, column=0, pady=5)
+        acert.grid(row=7, column=1, pady=5)
+        a_explore.grid(row=8, column=0, columnspan=2, pady=5)
+
+        validate_button.grid(row=9, column=0, columnspan=2, pady=5)
 
         exit_button.pack()
 
-
     def m_browser(self, box, looking_for):
         m_filename = filedialog.askopenfilename(initialdir=PATH + "src/" + self.curr_user.user_name + "_datos/",
-                                                title="select file", filetypes=(looking_for, ("All files", "")))
+                                                title="select file", filetypes=(looking_for, ))
         box.config(state='normal')
         box.delete(0, END)
         box.insert(0, m_filename)
