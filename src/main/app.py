@@ -985,6 +985,7 @@ class App:
         download.pack()
         validate_fm = Frame(main_frame, borderwidth=constantes.FRAME_BORDERWIDTH, relief='groove')
         validate_fm.pack()
+        exit_button.pack()
         validate_title = Label(validate_fm, text="Valida tus notas", font=(constantes.TITTLE_FONT, SUBTITLE_SIZE))
         message = Label(validate_fm, text="Mensaje")
         sign = Label(validate_fm, text="Firma")
@@ -1015,14 +1016,12 @@ class App:
         s_explore.grid(row=4, column=0, columnspan=2, pady=5)
         ac1.grid(row=5, column=0, pady=5)
         a1cert.grid(row=5, column=1, pady=5)
-        ac1_explore.grid(row=6,column=0, columnspan=2, pady=5)
+        ac1_explore.grid(row=6, column=0, columnspan=2, pady=5)
         a.grid(row=7, column=0, pady=5)
         acert.grid(row=7, column=1, pady=5)
         a_explore.grid(row=8, column=0, columnspan=2, pady=5)
 
         validate_button.grid(row=9, column=0, columnspan=2, pady=5)
-
-        exit_button.pack()
 
     def m_browser(self, box, looking_for):
         m_filename = filedialog.askopenfilename(initialdir=PATH + "src/" + self.curr_user.user_name + "_datos/",
